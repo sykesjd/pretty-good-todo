@@ -37,7 +37,7 @@ module.exports = {
 	 */
 	getTodos: (date, callback) => {
 		let theDate = tools.getAbsDate(date);
-		todos.find({ 'date': theDate.toISOString() }).toArray().then((todoList) => callback(todoList));
+		todos.find({ 'date': theDate }).toArray().then((todoList) => callback(todoList));
 	},
 	/*
 	 * Create todo from request body, adding a GUID
@@ -73,7 +73,7 @@ module.exports = {
 	 */
 	rolloverTodos: () => {
 		let today = tools.getAbsDate('today');
-		todos.updateMany({ date: { $lt: today.toISOString() }, done: false }, { $set: { date: today.toISOString() } }, {}, (error, result) => {
+		todos.updateMany({ date: { $lt: today }, done: false }, { $set: { date: today } }, {}, (error, result) => {
 			if (error) throw error;
 			if (result.matchedCount > 0 && result.result.ok !== 1) {
 				throw "Error rolling over undone todos to today";
@@ -101,8 +101,8 @@ const tools = {
 	 */
 	todoFromBody: (body) => {
 		let today = tools.getAbsDate('today');
-		if (!body.done && new Date(body.date) < today) {
-			body.date = today.toISOString();
+		if (!body.done && new Date(body.date) < new Date(today)) {
+			body.date = today;
 		}
 		return body;
 	},
@@ -112,7 +112,7 @@ const tools = {
 	getAbsDate: (date) => {
 		let theDate = (date === 'today' ? new Date((new Date()).toDateString()) : new Date(date))
 		theDate.setUTCHours(0, 0, 0, 0);
-		return theDate;
+		return theDate.toISOString();
 	},
 	/*
 	 * Helper function for createTodo: create a GUID string
