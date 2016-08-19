@@ -39,7 +39,7 @@ Like GoodTodo, at every midnight (local time), this application rolls over undon
 
 ## Contents
 
-- `server.js`: the main NodeJS server script - connects to the database and starts up the server and API
+- `pgt-server.js`: the main NodeJS server script - connects to the database and starts up the server and API
 - `startup.js`: module used by the NodeJS server containing startup operations
 - `database.js`: module used by the NodeJS application to interface with MongoDB
 	- If you wish to use a different back-end than MongoDB, then you must create your own `database.js` with the following functions exported:
