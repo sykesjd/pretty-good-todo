@@ -3,7 +3,7 @@
  * Todo object format:
  * 		{
  *			_id: 'someGUIDstr',
- *			date: dateObj, // newDate(date.toDateString())
+ *			date: 'dateISOString',
  *			title: 'todoTitle',
  *			body: 'todoBody',
  *			done: bool
