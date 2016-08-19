@@ -1,2 +1,2 @@
-pkill -2 -f "node server.js"
+pkill -2 -f "node pgt-server.js"
 echo "PrettyGoodTodo stopped"

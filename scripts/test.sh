@@ -1,3 +1,3 @@
 echo "Testing PrettyGoodTodo..."
-nohup node server.js > server.log & pkill -2 -f "node server.js"
+nohup node server.js > pgt-server.log & pkill -2 -f "node pgt-server.js"
 echo "Test successful"

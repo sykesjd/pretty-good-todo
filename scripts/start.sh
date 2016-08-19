@@ -1,2 +1,2 @@
-nohup node server.js > server.log &
+nohup node pgt-server.js > server.log &
 echo "PrettyGoodTodo started"
