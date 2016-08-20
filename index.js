@@ -21,7 +21,13 @@ const startup = {
 			let date = new Date($('#dateSel').val());
 			date.setUTCHours(0, 0, 0, 0);
 			$('#todos').empty().attr('data-date', date.toISOString());
-			ajaxOps.getTodos($('#todos').attr('data-date'));
+			ajaxOps.getTodos($('#todos').attr('data-date'), (data) => {
+				data.forEach((todo) => {
+					let element = todoOps.todoEl(todo);
+					todoOps.attachElListeners(element);
+					element.appendTo('#todos');
+				});
+			});
 		});
 		$('#next').click(() => {
 			$('#dateSel').val((i, val) => {
@@ -36,6 +42,11 @@ const startup = {
 				date.setDate(date.getDate() - 1);
 				return date.toJSON().slice(0, 10);
 			}).change();
+		});
+		$('#editDate').change(() => {
+			let date = new Date($('#editDate').val());
+			date.setUTCHours(0, 0, 0, 0);
+			$('#editDate').attr('data-date', date.toISOString());
 		});
 		$('#editNext').click(() => {
 			$('#editDate').val((i, val) => {

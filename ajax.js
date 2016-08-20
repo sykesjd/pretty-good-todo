@@ -7,17 +7,11 @@ const ajaxOps = {
 	/*
 	 * Get todos for the given date
 	 */
-	getTodos: (date) => {
+	getTodos: (date, callback) => {
 		$.ajax({
 			url: apiURLs.GET + date,
 			type: 'get',
-			success: (data) => {
-				data.forEach((todo) => {
-					let element = tools.todoEl(todo);
-					tools.attachElListeners(element);
-					element.appendTo('#todos');
-				});
-			},
+			success: (data) => callback(data),
 			error: () => {
 				$('#errorReport').text('Error fetching todos; reload the page');
 			}
@@ -27,11 +21,10 @@ const ajaxOps = {
 	 * Create todo from data in new todo form
 	 */
 	createTodo: (callback) => {
-		let todo = tools.newTodo();
 		$.ajax({
 			url: apiURLs.PUT,
 			type: 'put',
-			data: JSON.stringify(todo),
+			data: JSON.stringify(ajaxTools.newTodo()),
 			headers: {
 				'Content-Type': 'application/json'
 			},
@@ -45,11 +38,10 @@ const ajaxOps = {
 	 * Update a given todo
 	 */
 	updateTodo: (li, editBoxUsed, callback) => {
-		let todo = tools.todoFromEl(li, editBoxUsed);
 		$.ajax({
-			url: apiURLs.POST + todo._id,
+			url: apiURLs.POST + li.attr('data-id'),
 			type: 'post',
-			data: JSON.stringify(todo),
+			data: JSON.stringify(ajaxTools.todoFromEl(li, editBoxUsed)),
 			headers: {
 				'Content-Type': 'application/json'
 			},
@@ -87,70 +79,7 @@ const apiURLs = {
 /*
  * Helper functions for the AJAX operations above
  */
-const tools = {
-	/*
-	 * Attach event listeners to a newly-created todo li
-	 */
-	attachElListeners: (element) => {
-		element.find('input[type="checkbox"]').change((e) => {
-			element.attr('data-checked', e.target.checked);
-			ajaxOps.updateTodo(element, false, () => $('#dateSel').change());
-		});
-		element.find('.glyphicon-chevron-up').click(() => {
-			let previous = element.prev();
-			if (previous.length > 0) {
-				previous.attr('data-order', parseInt(previous.attr('data-order')) + 1);
-				element.attr('data-order', parseInt(element.attr('data-order')) - 1);
-				ajaxOps.updateTodo(previous, false, () => {
-					ajaxOps.updateTodo(element, false, () => $('#dateSel').change());
-				});
-			}
-		});
-		element.find('.glyphicon-chevron-down').click(() => {
-			let next = element.next();
-			if (next.length > 0) {
-				next.attr('data-order', parseInt(next.attr('data-order')) - 1);
-				element.attr('data-order', parseInt(element.attr('data-order')) + 1);
-				ajaxOps.updateTodo(next, false, () => {
-					ajaxOps.updateTodo(element, false, () => $('#dateSel').change());
-				});
-			}
-		});
-		element.find('.glyphicon-info-sign').click(() => {
-			element.find('.message').toggle();
-		});
-		element.find('.glyphicon-edit').click((e) => {
-			$('#new').hide();
-			$('#edit').show();
-			$('#editTitle').val(element.attr('data-title'));
-			$('#editMessage').val(element.attr('data-body'));
-			$('#editDate').val($('#dateSel').val()).attr('data-date', $('#todos').attr('data-date')).change(() => {
-				let date = new Date($('#editDate').val());
-				date.setUTCHours(0, 0, 0, 0);
-				$('#editDate').attr('data-date', date.toISOString());
-			});
-			$('#editSubmit').click(() => {
-				if ($('#editTitle').val() !== '') {
-					tools.updateEditedTodo(element);
-				}
-			});
-		});
-		element.find('.glyphicon-remove-sign').click(() => {
-			ajaxOps.deleteTodo(element, () => $('#dateSel').change());
-		});
-	},
-	/*
-	 * Update todo data in its li from edit todo form and update todo
-	 */
-	updateEditedTodo: (element) => {
-		element.attr('data-title', $('#editTitle').val()).attr('data-body', $('#editMessage').val());
-		ajaxOps.updateTodo(element, true, () => {
-			$('#editSubmit').unbind('click');
-			$('#edit').hide();
-			$('#new').show();
-			$('#dateSel').change();
-		});
-	},
+const ajaxTools = {
 	/*
 	 * Create new todo object from new todo form
 	 */
@@ -174,24 +103,5 @@ const tools = {
 			'done': li.attr('data-checked') === 'true',
 			'order': parseInt(li.attr('data-order'))
 		};
-	},
-	/*
-	 * Create todo li from todo object
-	 */
-	todoEl: (todo) => $('<li class="list-group-item" data-id = "' + todo._id + '" data-title="' + todo.title + '"\
-							data-body="' + todo.body + '" data-checked="' + todo.done + '" data-order="' + todo.order + '">\
-						<span class="checkbox">\
-							<label>\
-								<input type="checkbox"' + (todo.done ? ' checked' : '') + ' />' + todo.title + '\
-							</label>\
-							<span class="pull-right">\
-								<span class="glyphicon glyphicon-chevron-up"></span>\
-								<span class="glyphicon glyphicon-chevron-down"></span>\
-								<span class="glyphicon glyphicon-info-sign"></span>\
-								<span class="glyphicon glyphicon-edit"></span>\
-								<span class="glyphicon glyphicon-remove-sign"></span>\
-							</span>\
-						</span>\
-						<p class="message">' + todo.body.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</p>\
-					   </li>')
+	}
 };
