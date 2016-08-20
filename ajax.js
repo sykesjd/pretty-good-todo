@@ -150,14 +150,15 @@ const tools = {
 			'date': $('#todos').attr('data-date'),
 			'title': li.attr('data-title'),
 			'body': li.attr('data-body'),
-			'done': li.attr('data-checked') === 'true'
+			'done': li.attr('data-checked') === 'true',
+			'order': parseInt(li.attr('order'))
 		};
 	},
 	/*
 	 * Create todo li from todo object
 	 */
 	todoEl: (todo) => $('<li class="list-group-item" data-id = "' + todo._id + '" data-title="' + todo.title + '"\
-												   data-body="' + todo.body + '" data-checked="' + todo.done + '">\
+							data-body="' + todo.body + '" data-checked="' + todo.done + '" data-order="' + todo.order + '">\
 						<span class="checkbox">\
 							<label>\
 								<input type="checkbox"' + (todo.done ? ' checked' : '') + ' />' + todo.title + '\

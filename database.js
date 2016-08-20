@@ -6,9 +6,10 @@
  *			date: 'dateISOString',
  *			title: 'todoTitle',
  *			body: 'todoBody',
- *			done: bool
+ *			done: bool,
+ *			order: int
  *      }
- * Post request body has _id; put request body does not
+ * Post request body has _id and order; put request body does not
  */
 'use strict';
 
@@ -37,16 +38,22 @@ module.exports = {
 	 */
 	getTodos: (date, callback) => {
 		let theDate = tools.getAbsDate(date);
-		todos.find({ 'date': theDate }).toArray().then((todoList) => callback(todoList));
+		todos.find({ 'date': theDate }).toArray().then((todoList) => {
+			todoList.sort((a,b) => a.order - b.order);
+			callback(todoList);
+		});
 	},
 	/*
-	 * Create todo from request body, adding a GUID
+	 * Create todo from request body, adding a GUID and ordering
 	 */
 	createTodo: (body, callback) => {
 		body._id = tools.guid();
-		todos.insertOne(tools.todoFromBody(body), {}, (error, result) => {
-			if (error) throw error;
-			callback(result.result.ok === 1);
+		todos.find({ 'date': body.date }).toArray().then((dateTodos) => {
+			body.order = dateTodos.length + 1;
+			todos.insertOne(tools.todoFromBody(body), {}, (error, result) => {
+				if (error) throw error;
+				callback(result.result.ok === 1);
+			});
 		});
 	},
 	/*
