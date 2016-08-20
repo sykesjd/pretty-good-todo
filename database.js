@@ -79,13 +79,11 @@ module.exports = {
 	 * Move undone todos from the past to today
 	 * Throws an error if operation unsuccessful
 	 */
-	rolloverTodos: () => {
+	rolloverTodos: (callback) => {
 		let today = tools.getAbsDate('today');
 		todos.updateMany({ date: { $lt: today }, done: false }, { $set: { date: today } }, {}, (error, result) => {
 			if (error) throw error;
-			if (result.matchedCount > 0 && result.result.ok !== 1) {
-				throw "Error rolling over undone todos to today";
-			}
+			callback(result.matchedCount === 0 || result.result.ok === 1);
 		});
 	},
 	/*

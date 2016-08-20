@@ -17,8 +17,10 @@ module.exports = {
 	 */
 	connectToDB: (callback) => {
 		dbOps.connect(() => {
-			dbOps.rolloverTodos();
-			callback();
+			dbOps.rolloverTodos((success) => {
+				if (!success) throw "Error rolling over undone todos to today";
+				callback();
+			});
 		});
 	},
 	/*
@@ -42,7 +44,11 @@ module.exports = {
 	 * Initialize operation occurring every midnight to roll over undone todos
 	 */
 	initializeMidnightOp: () => {
-		midnightOp = require('node-schedule').scheduleJob({ hour: 0, minute: 0 }, () => dbOps.rolloverTodos());
+		midnightOp = require('node-schedule').scheduleJob({ hour: 0, minute: 0 }, () => {
+			dbOps.rolloverTodos((success) => {
+				if (!success) throw "Error rolling over yesterday's undone todos to today";
+			});
+		});
 	},
 	/*
 	 * Start and return the express server

@@ -48,7 +48,7 @@ Like GoodTodo, at every midnight (local time), this application rolls over undon
 		- `createTodo(body, callback)`: adds a todo to your database from the data in the request body and returns whether the operation was successful via `callback(success)`
 		- `updateTodo(id, body, callback)`: updates the todo with the given id in your database using the data in the request body and returns whether the operation was successful via `callback(success)`
 		- `deleteTodo(id, callback)`: deletes the todo with the given id from your database and returns whether the operation was successful via `callback(success)`
-		- `rolloverTodos()`: finds all undone todos from the past and changes their date to today
+		- `rolloverTodos(callback)`: changes the date of all undone todos from the past to today and returns whether the operation was successful via `callback(success)`
 		- `disconnect()`: closes the connection to your database
 - `index.html`: the client-facing application page
 - `index.js`: the client-side script used by `index.html` to attach event listeners and initialize the page to show today's todos
