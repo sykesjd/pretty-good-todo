@@ -37,11 +37,25 @@ You can test these endpoints apart from the client interface using an applicatio
 
 Like GoodTodo, at every midnight (local time), this application rolls over undone todos from past days into the current day. This action is also performed at application startup.
 
+## Importing from GoodTodo
+
+This repository contains a script to import your GoodTodo data into the PrettyGoodTodo todo database. To import your GoodTodo data, perform the following steps:
+
+1. After logging into GoodTodo, go to Preferences -> One-Time Email Export.
+2. Under "Send in which format?", select "Comma-separated data, in an attachment".
+3. Under "Select the range of todos to export", select "All of your todos - past, present, and future".
+4. Click "Send Export", then log into your email to find the resulting email.
+5. Download the CSV attachment in the email into this directory.
+6. Navigate to this directory in your command line and execute the command `node import.js <csvFileName>`, replacing `<csvFileName>` with the name of your CSV file.
+
+Upon completion of the import script, your todos should be viewable in PrettyGoodTodo.
+
 ## Contents
 
 - `pgt-server.js`: the main NodeJS server script - connects to the database and starts up the server and API
 - `startup.js`: module used by the NodeJS server containing startup operations
 - `database.js`: module used by the NodeJS application to interface with MongoDB
+- `import.js`: NodeJS script to import data from GoodTodo
 - `index.html`: the client-facing application page
 - `index.js`: the client-side script used by `index.html` to attach event listeners and initialize the page to show today's todos
 - `ajax.js`: client-side script through which the client application interfaces with the server's API
