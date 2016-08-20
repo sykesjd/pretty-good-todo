@@ -3,7 +3,7 @@
  */
 'use strict';
 
-let db, todos;
+let db, todos, backup;
 
 /*
  * Database operations provided to NodeJS server
@@ -17,6 +17,13 @@ module.exports = {
 			if (error) throw error;
 			db = database;
 			todos = db.collection('todos');
+			backup = new (require('mongo-dumper').DatabaseToFileDumper)({
+				hosts: 'localhost:27017',
+				output: {
+					timestampLabel: 'YYYY-MM-DD_HH-mm-ss',
+					prefix: 'backups/todos'
+				}
+			});
 			todos.createIndex({ date: 1 }, { expireAfterSeconds: tools.expiration() }, (err, res) => {
 				if (err) throw err;
 				callback();
@@ -128,9 +135,16 @@ module.exports = {
 		});
 	},
 	/*
+	 * Backs up the todo database
+	 */
+	backup: () => {
+		backup.transport();
+	},
+	/*
 	 * Close the connection to the database
 	 */
 	disconnect: () => {
+		backup.transport();
 		db.close();
 	}
 };

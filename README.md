@@ -18,7 +18,7 @@ Once you have installed MongoDB, clone this repository then navigate into this d
 
 ### Client-Facing Application
 
-After executing `npm start`, navigate to `localhost:3000` in your browser to view the PrettyGoodTodo client. On this page, you will be presented with a list of today's todos. Above the list of todos is the navigation for date selection, where you can go to the next or previous day or select a day directly in the date field. Below the list of todos is a form for creating a new todo, where you enter the name of the todo and an optional message to accompany the todo.
+After executing `npm start`, navigate to `localhost:3000` in your browser to view the PrettyGoodTodo client. On this page, you will be presented with a list of today's todos. Above the list of todos is the navigation for date selection, where you can go to the next or previous day or select a day directly in the date field. On the right side of the list of todos is a form for creating a new todo, where you enter the name of the todo and an optional message to accompany the todo.
 
 On each todo, you will see a checkbox for indicating whether the todo has been completed; an information icon for toggling viewing the message accompanying the todo; an edit icon for editing the todo, at which point the 'new todo' form becomes an 'edit todo' form; and a delete icon for deleting the todo entirely.
 
@@ -84,4 +84,3 @@ If you wish to use a different back-end than MongoDB, then you must create your 
 The following list of future work items is up to date as of 20 August 2016:
 
 - **Midnight test**: I have yet to test to see if the midnight operation will occur if the computer on which an instance is running is sleeping.
-- **Automatic backups**: Right now, the burden of backing up the MongoDB todos collection is placed upon the end user; ideally, I would like for backups to be part of the midnight process and the shutdown process.

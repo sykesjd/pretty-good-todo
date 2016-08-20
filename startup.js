@@ -47,6 +47,7 @@ module.exports = {
 		midnightOp = require('node-schedule').scheduleJob({ hour: 0, minute: 0 }, () => {
 			dbOps.rolloverTodos((success) => {
 				if (!success) throw "Error rolling over yesterday's undone todos to today";
+				dbOps.backup();
 			});
 		});
 	},
