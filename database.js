@@ -1,15 +1,5 @@
 /**
  * Module through which NodeJS server interfaces with MongoDB todo database
- * Todo object format:
- * 		{
- *			_id: 'someGUIDstr',
- *			date: 'dateISOString',
- *			title: 'todoTitle',
- *			body: 'todoBody',
- *			done: bool,
- *			order: int
- *      }
- * Post request body has _id and order; put request body does not
  */
 'use strict';
 

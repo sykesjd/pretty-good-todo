@@ -42,18 +42,42 @@ Like GoodTodo, at every midnight (local time), this application rolls over undon
 - `pgt-server.js`: the main NodeJS server script - connects to the database and starts up the server and API
 - `startup.js`: module used by the NodeJS server containing startup operations
 - `database.js`: module used by the NodeJS application to interface with MongoDB
-	- If you wish to use a different back-end than MongoDB, then you must create your own `database.js` with the following functions exported:
-		- `connect(callback)`: connects to your database then executes `callback()`
-		- `getTodos(date, callback)`: gets the todos for the given date from your database and returns the list of todos via `callback(todoList)`
-		- `createTodo(body, callback)`: adds a todo to your database from the data in the request body and returns whether the operation was successful via `callback(success)`
-		- `updateTodo(id, body, callback)`: updates the todo with the given id in your database using the data in the request body and returns whether the operation was successful via `callback(success)`
-		- `deleteTodo(id, callback)`: deletes the todo with the given id from your database and returns whether the operation was successful via `callback(success)`
-		- `rolloverTodos(callback)`: changes the date of all undone todos from the past to today and returns whether the operation was successful via `callback(success)`
-		- `disconnect()`: closes the connection to your database
 - `index.html`: the client-facing application page
 - `index.js`: the client-side script used by `index.html` to attach event listeners and initialize the page to show today's todos
 - `ajax.js`: client-side script through which the client application interfaces with the server's API
 - Shell scripts: scripts used by the npm package to start, stop, and test this application (hence the necessity for PowerShell on Windows); located in the `scripts` directory
+
+### Using a different database
+
+If you wish to use a different back-end than MongoDB, then you must create your own `database.js` with the following functions exported:
+
+- `connect(callback)`: connects to your database then executes `callback()`
+- `getTodos(date, callback)`: gets the todos for the given date from your database and returns the list of todos via `callback(todoList)`
+- `createTodo(body, callback)`: adds a todo to your database from the data in the request body and returns whether the operation was successful via `callback(success)`
+	- Request body format (your function must add fields `_id` and `order`):
+		```javascript
+		{
+			'date': 'dateISOString',
+			'title': 'todoTitle',
+			'body': 'todoBody',
+			'done': false
+		}
+		```
+- `updateTodo(id, body, callback)`: updates the todo with the given id in your database using the data in the request body and returns whether the operation was successful via `callback(success)`
+	- Request body format:
+		```javascript
+		{
+			'_id': 'GUID',
+			'date': 'dateISOString',
+			'title': 'todoTitle',
+			'body': 'todoBody',
+			'done': bool,
+			'order': int
+		}
+		```
+- `deleteTodo(id, callback)`: deletes the todo with the given id from your database and returns whether the operation was successful via `callback(success)`
+- `rolloverTodos(callback)`: changes the date of all undone todos from the past to today and returns whether the operation was successful via `callback(success)`
+- `disconnect()`: closes the connection to your database
 
 ## Future Work
 
