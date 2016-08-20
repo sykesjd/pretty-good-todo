@@ -37,6 +37,20 @@ const startup = {
 				return date.toJSON().slice(0, 10);
 			}).change();
 		});
+		$('#editNext').click(() => {
+			$('#editDate').val((i, val) => {
+				let date = new Date(val);
+				date.setDate(date.getDate() + 1);
+				return date.toJSON().slice(0, 10);
+			}).change();
+		});
+		$('#editPrev').click(() => {
+			$('#editDate').val((i, val) => {
+				let date = new Date(val);
+				date.setDate(date.getDate() - 1);
+				return date.toJSON().slice(0, 10);
+			}).change();
+		});
 	},
 	/*
 	 * Attach listeners to form buttons

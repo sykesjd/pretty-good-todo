@@ -61,18 +61,61 @@ module.exports = {
      * Update todo with ID from request body
 	 */
 	updateTodo: (id, body, callback) => {
-		todos.updateOne({ _id: id }, { $set: tools.todoFromBody(body) }, {}, (error, result) => {
-			if (error) throw error;
-			callback(result.result.ok === 1);
+		body = tools.todoFromBody(body);
+		todos.find({ '_id': id}).toArray().then((todo) => {
+			if (todo.length === 0) {
+				throw 'Todo to update not found';
+			} else {
+				if (todo[0].date !== body.date) {
+					todos.find({ 'date': todo[0].date }).toArray().then((oldDateTodos) => {
+						oldDateTodos.forEach((odt) => {
+							if (odt.order > todo[0].order) {
+								todos.updateOne({ '_id': odt._id }, { $set: { 'order': odt.order - 1 } }, {}, (e, r) => {
+									if (e) throw e;
+									if (result.result.ok !== 1) throw 'Error redating';
+								});
+							}
+						});
+					});
+					todos.find({ 'date': body.date }).toArray().then((newDateTodos) => {
+						body.order = newDateTodos.length + 1;
+						todos.updateOne({ '_id': id }, { $set: body }, {}, (error, result) => {
+							if (error) throw error;
+							callback(result.result.ok === 1);
+						});
+					});
+				} else {
+					todos.updateOne({ '_id': id }, { $set: body }, {}, (error, result) => {
+						if (error) throw error;
+						callback(result.result.ok === 1);
+					});
+				}
+			}
 		});
 	},
 	/*
      * Deletes todo with ID
 	 */
 	deleteTodo: (id, callback) => {
-		todos.deleteOne({ _id: id }, {}, (error, result) => {
-			if (error) throw error;
-			callback(result.result.ok === 1);
+		todos.find({ '_id': id }).toArray().then((todo) => {
+			if (todo.length === 0) {
+				throw 'Todo to delete not found';
+			} else {
+				todos.find({ 'date': todo[0].date }).toArray().then((dateTodos) => {
+					dateTodos.forEach((dt) => {
+						if (dt.order > todo[0].order) {
+							todos.updateOne({ '_id': dt._id }, { $set: { 'order': dt.order - 1 } }, {}, (e, r) => {
+								if (e) throw e;
+								if (r.result.ok !== 1) throw 'Error adjusting todos around deleted todo';
+							});
+						}
+					});
+					todos.deleteOne({ _id: id }, {}, (error, result) => {
+						if (error) throw error;
+						callback(result.result.ok === 1);
+					});
+				});
+			}
 		});
 	},
 	/*
@@ -81,9 +124,17 @@ module.exports = {
 	 */
 	rolloverTodos: (callback) => {
 		let today = tools.getAbsDate('today');
-		todos.updateMany({ date: { $lt: today }, done: false }, { $set: { date: today } }, {}, (error, result) => {
-			if (error) throw error;
-			callback(result.matchedCount === 0 || result.result.ok === 1);
+		let success = true;
+		todos.find({ 'date': today }).toArray().then((existingTodos) => {
+			todos.find({ 'date': { $lt: today}, 'done': false }).toArray().then((rollingOver) => {
+				rollingOver.forEach((r, i) => {
+					todos.updateOne({ '_id': r._id }, { $set: { 'date': today, 'order': existingTodos.length + i } }, {}, (error, result) => {
+						if (error) throw error;
+						success = success && (result.matchedCount === 0 || result.result.ok === 1);
+					});
+				});
+				callback(success);
+			});
 		});
 	},
 	/*

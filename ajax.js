@@ -44,8 +44,8 @@ const ajaxOps = {
 	/*
 	 * Update a given todo
 	 */
-	updateTodo: (li, callback) => {
-		let todo = tools.todoFromEl(li);
+	updateTodo: (li, editBoxUsed, callback) => {
+		let todo = tools.todoFromEl(li, editBoxUsed);
 		$.ajax({
 			url: apiURLs.POST + todo._id,
 			type: 'post',
@@ -94,15 +94,15 @@ const tools = {
 	attachElListeners: (element) => {
 		element.find('input[type="checkbox"]').change((e) => {
 			element.attr('data-checked', e.target.checked);
-			ajaxOps.updateTodo(element, () => $('#dateSel').change());
+			ajaxOps.updateTodo(element, false, () => $('#dateSel').change());
 		});
 		element.find('.glyphicon-chevron-up').click(() => {
 			let previous = element.prev();
 			if (previous.length > 0) {
 				previous.attr('data-order', parseInt(previous.attr('data-order')) + 1);
 				element.attr('data-order', parseInt(element.attr('data-order')) - 1);
-				ajaxOps.updateTodo(previous, () => {
-					ajaxOps.updateTodo(element, () => $('#dateSel').change());
+				ajaxOps.updateTodo(previous, false, () => {
+					ajaxOps.updateTodo(element, false, () => $('#dateSel').change());
 				});
 			}
 		});
@@ -111,8 +111,8 @@ const tools = {
 			if (next.length > 0) {
 				next.attr('data-order', parseInt(next.attr('data-order')) - 1);
 				element.attr('data-order', parseInt(element.attr('data-order')) + 1);
-				ajaxOps.updateTodo(next, () => {
-					ajaxOps.updateTodo(element, () => $('#dateSel').change());
+				ajaxOps.updateTodo(next, false, () => {
+					ajaxOps.updateTodo(element, false, () => $('#dateSel').change());
 				});
 			}
 		});
@@ -124,6 +124,11 @@ const tools = {
 			$('#edit').show();
 			$('#editTitle').val(element.attr('data-title'));
 			$('#editMessage').val(element.attr('data-body'));
+			$('#editDate').val($('#dateSel').val()).attr('data-date', $('#todos').attr('data-date')).change(() => {
+				let date = new Date($('#editDate').val());
+				date.setUTCHours(0, 0, 0, 0);
+				$('#editDate').attr('data-date', date.toISOString());
+			});
 			$('#editSubmit').click(() => {
 				if ($('#editTitle').val() !== '') {
 					tools.updateEditedTodo(element);
@@ -139,7 +144,7 @@ const tools = {
 	 */
 	updateEditedTodo: (element) => {
 		element.attr('data-title', $('#editTitle').val()).attr('data-body', $('#editMessage').val());
-		ajaxOps.updateTodo(element, () => {
+		ajaxOps.updateTodo(element, true, () => {
 			$('#editSubmit').unbind('click');
 			$('#edit').hide();
 			$('#new').show();
@@ -160,10 +165,10 @@ const tools = {
 	/*
 	 * Create todo object from todo li data
 	 */
-	todoFromEl: (li) => {
+	todoFromEl: (li, editBoxUsed) => {
 		return {
 			'_id': li.attr('data-id'),
-			'date': $('#todos').attr('data-date'),
+			'date': $(editBoxUsed ? '#editDate' : '#todos').attr('data-date'),
 			'title': li.attr('data-title'),
 			'body': li.attr('data-body'),
 			'done': li.attr('data-checked') === 'true',
