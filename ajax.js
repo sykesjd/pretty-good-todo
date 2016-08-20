@@ -26,7 +26,7 @@ const ajaxOps = {
 	/*
 	 * Create todo from data in new todo form
 	 */
-	createTodo: () => {
+	createTodo: (callback) => {
 		let todo = tools.newTodo();
 		$.ajax({
 			url: apiURLs.PUT,
@@ -35,9 +35,7 @@ const ajaxOps = {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			success: () => {
-				$('#dateSel').change();
-			},
+			success: () => callback(),
 			error: () => {
 				$('#errorReport').text('Error creating todo; reload the page');
 			}
@@ -46,7 +44,7 @@ const ajaxOps = {
 	/*
 	 * Update a given todo
 	 */
-	updateTodo: (li) => {
+	updateTodo: (li, callback) => {
 		let todo = tools.todoFromEl(li);
 		$.ajax({
 			url: apiURLs.POST + todo._id,
@@ -55,9 +53,7 @@ const ajaxOps = {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			success: () => {
-				$('#dateSel').change();
-			},
+			success: () => callback(),
 			error: () => {
 				$('#errorReport').text('Error updating todo; reload the page');
 			}
@@ -66,13 +62,11 @@ const ajaxOps = {
 	/*
 	 * Delete a given todo
 	 */
-	deleteTodo: (li) => {
+	deleteTodo: (li, callback) => {
 		$.ajax({
 			url: apiURLs.DELETE + li.attr('data-id'),
 			type: 'delete',
-			success: () => {
-				$('#dateSel').change();
-			},
+			success: () => callback(),
 			error: () => {
 				$('#errorReport').text('Error deleting todo; reload the page');
 			}
@@ -100,7 +94,27 @@ const tools = {
 	attachElListeners: (element) => {
 		element.find('input[type="checkbox"]').change((e) => {
 			element.attr('data-checked', e.target.checked);
-			ajaxOps.updateTodo(element);
+			ajaxOps.updateTodo(element, () => $('#dateSel').change());
+		});
+		element.find('.glyphicon-chevron-up').click(() => {
+			let previous = element.prev();
+			if (previous.length > 0) {
+				previous.attr('data-order', parseInt(previous.attr('data-order')) + 1);
+				element.attr('data-order', parseInt(element.attr('data-order')) - 1);
+				ajaxOps.updateTodo(previous, () => {
+					ajaxOps.updateTodo(element, () => $('#dateSel').change());
+				});
+			}
+		});
+		element.find('.glyphicon-chevron-down').click(() => {
+			let next = element.next();
+			if (next.length > 0) {
+				next.attr('data-order', parseInt(next.attr('data-order')) - 1);
+				element.attr('data-order', parseInt(element.attr('data-order')) + 1);
+				ajaxOps.updateTodo(next, () => {
+					ajaxOps.updateTodo(element, () => $('#dateSel').change());
+				});
+			}
 		});
 		element.find('.glyphicon-info-sign').click(() => {
 			element.find('.message').toggle();
@@ -117,7 +131,7 @@ const tools = {
 			});
 		});
 		element.find('.glyphicon-remove-sign').click(() => {
-			ajaxOps.deleteTodo(element);
+			ajaxOps.deleteTodo(element, () => $('#dateSel').change());
 		});
 	},
 	/*
@@ -125,10 +139,12 @@ const tools = {
 	 */
 	updateEditedTodo: (element) => {
 		element.attr('data-title', $('#editTitle').val()).attr('data-body', $('#editMessage').val());
-		ajaxOps.updateTodo(element);
-		$('#editSubmit').unbind('click');
-		$('#edit').hide();
-		$('#new').show();
+		ajaxOps.updateTodo(element, () => {
+			$('#editSubmit').unbind('click');
+			$('#edit').hide();
+			$('#new').show();
+			$('#dateSel').change();
+		});
 	},
 	/*
 	 * Create new todo object from new todo form
@@ -151,7 +167,7 @@ const tools = {
 			'title': li.attr('data-title'),
 			'body': li.attr('data-body'),
 			'done': li.attr('data-checked') === 'true',
-			'order': parseInt(li.attr('order'))
+			'order': parseInt(li.attr('data-order'))
 		};
 	},
 	/*
@@ -164,6 +180,8 @@ const tools = {
 								<input type="checkbox"' + (todo.done ? ' checked' : '') + ' />' + todo.title + '\
 							</label>\
 							<span class="pull-right">\
+								<span class="glyphicon glyphicon-chevron-up"></span>\
+								<span class="glyphicon glyphicon-chevron-down"></span>\
 								<span class="glyphicon glyphicon-info-sign"></span>\
 								<span class="glyphicon glyphicon-edit"></span>\
 								<span class="glyphicon glyphicon-remove-sign"></span>\

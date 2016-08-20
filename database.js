@@ -48,9 +48,10 @@ module.exports = {
 	 */
 	createTodo: (body, callback) => {
 		body._id = tools.guid();
+		body = tools.todoFromBody(body);
 		todos.find({ 'date': body.date }).toArray().then((dateTodos) => {
 			body.order = dateTodos.length + 1;
-			todos.insertOne(tools.todoFromBody(body), {}, (error, result) => {
+			todos.insertOne(body, {}, (error, result) => {
 				if (error) throw error;
 				callback(result.result.ok === 1);
 			});

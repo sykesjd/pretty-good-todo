@@ -49,9 +49,11 @@ const startup = {
 		});
 		$('#newSubmit').click(() => {
 			if ($('#newTitle').val() !== '') {
-				ajaxOps.createTodo();
-				$('#newTitle').val('');
-				$('#newMessage').val('');
+				ajaxOps.createTodo(() => {
+					$('#newTitle').val('');
+					$('#newMessage').val('');
+					$('#dateSel').change();
+				});
 			}
 		});
 	},

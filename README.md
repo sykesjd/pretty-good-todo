@@ -57,8 +57,8 @@ Like GoodTodo, at every midnight (local time), this application rolls over undon
 
 ## Future Work
 
-The following list of future work items is up to date as of 18 August 2016:
+The following list of future work items is up to date as of 20 August 2016:
 
 - **Midnight test**: I have yet to test to see if the midnight operation will occur if the computer on which an instance is running is sleeping.
-- **Ordering todos**: GoodTodo allows for the prioritization of todos within a given day; this feature is not yet implemented in PrettyGoodTodo.
+- **Re-dating todos**: GoodTodo allows for the re-dating of todos; this feature is not yet implemented in PrettyGoodTodo.
 - **Automatic backups**: Right now, the burden of backing up the MongoDB todos collection is placed upon the end user; ideally, I would like for backups to be part of the midnight process and the shutdown process.
