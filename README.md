@@ -20,7 +20,13 @@ Once you have installed MongoDB, clone this repository then navigate into this d
 
 After executing `npm start`, navigate to `localhost:3000` in your browser to view the PrettyGoodTodo client. On this page, you will be presented with a list of today's todos. Above the list of todos is the navigation for date selection, where you can go to the next or previous day or select a day directly in the date field. On the right side of the list of todos is a form for creating a new todo, where you enter the name of the todo and an optional message to accompany the todo.
 
-On each todo, you will see a checkbox for indicating whether the todo has been completed; an information icon for toggling viewing the message accompanying the todo; an edit icon for editing the todo, at which point the 'new todo' form becomes an 'edit todo' form; and a delete icon for deleting the todo entirely.
+On each todo, you will see the following:
+
+- a checkbox for indicating whether the todo has been completed
+- up and down arrows for re-prioritizing the todo
+- an information icon for toggling viewing the message accompanying the todo
+- an edit icon for editing the todo, at which point the 'new todo' form becomes an 'edit todo' form
+- a delete icon for deleting the todo entirely
 
 ### Server Todo API
 
@@ -37,7 +43,7 @@ You can test these endpoints apart from the client interface using an applicatio
 
 Like GoodTodo, this application rolls over undone todos from past days into the current day. This action is performed at application startup and when the GET endpoint is invoked on a day after the last rollover.
 
-### Automated Database backups
+### Automated Database Backups
 
 The MongoDB todo database is automatically backed up by this application on every daily rollover and on application shutdown. Backups are placed in a `backups` directory and can be used to transfer a database from one computer to another (see MongoDB documentation).
 
