@@ -38,7 +38,7 @@ module.exports = {
 	 */
 	getTodos: (date, callback) => {
 		let theDate = tools.getAbsDate(date);
-		if (new Date(lastRollover) < new Date(theDate)) {
+		if (new Date(lastRollover) < tools.getAbsDate('today')) {
 			tools.rolloverTodos((success) => {
 				if (!success) throw 'Error rolling over todos';
 				backup.transport();

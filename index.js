@@ -18,9 +18,7 @@ const startup = {
 	 */
 	attachDateListeners: () => {
 		$('#dateSel').change((e) => {
-			let date = new Date($('#dateSel').val());
-			date.setUTCHours(0, 0, 0, 0);
-			$('#todos').empty().attr('data-date', date.toISOString());
+			$('#todos').empty().attr('data-date', dateTools.toISODate($('#dateSel').val()));
 			ajaxOps.getTodos($('#todos').attr('data-date'), (data) => {
 				data.forEach((todo) => {
 					let element = todoOps.todoEl(todo);
@@ -30,37 +28,19 @@ const startup = {
 			});
 		});
 		$('#next').click(() => {
-			$('#dateSel').val((i, val) => {
-				let date = new Date(val);
-				date.setDate(date.getDate() + 1);
-				return date.toJSON().slice(0, 10);
-			}).change();
+			$('#dateSel').val((i, val) => dateTools.incDate(val)).change();
 		});
 		$('#prev').click(() => {
-			$('#dateSel').val((i, val) => {
-				let date = new Date(val);
-				date.setDate(date.getDate() - 1);
-				return date.toJSON().slice(0, 10);
-			}).change();
+			$('#dateSel').val((i, val) => dateTools.decDate(val)).change();
 		});
 		$('#editDate').change(() => {
-			let date = new Date($('#editDate').val());
-			date.setUTCHours(0, 0, 0, 0);
-			$('#editDate').attr('data-date', date.toISOString());
+			$('#editDate').attr('data-date', dateTools.toISODate($('#editDate').val()));
 		});
 		$('#editNext').click(() => {
-			$('#editDate').val((i, val) => {
-				let date = new Date(val);
-				date.setDate(date.getDate() + 1);
-				return date.toJSON().slice(0, 10);
-			}).change();
+			$('#editDate').val((i, val) => dateTools.incDate(val)).change();
 		});
 		$('#editPrev').click(() => {
-			$('#editDate').val((i, val) => {
-				let date = new Date(val);
-				date.setDate(date.getDate() - 1);
-				return date.toJSON().slice(0, 10);
-			}).change();
+			$('#editDate').val((i, val) => dateTools.decDate(val)).change();
 		});
 	},
 	/*
@@ -86,8 +66,44 @@ const startup = {
 	 * Set date to today and fetch today's todos
 	 */
 	gotoToday: () => {
+		$('#dateSel').val(dateTools.getToday()).change();
+	}
+};
+
+/*
+ * Date manipulation functions used by the startup operations
+ */
+const dateTools = {
+	/*
+	 * Get today in date field value form
+	 */
+	getToday: () => {
 		let today = new Date();
 		today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
-		$('#dateSel').val(today.toJSON().slice(0,10)).change();
+		return today.toJSON().slice(0,10);
+	},
+	/*
+	 * Get ISO string for the value of a date field
+	 */
+	toISODate: (dateVal) => {
+		let date = new Date(dateVal);
+		date.setUTCHours(0, 0, 0, 0);
+		return date.toISOString();
+	},
+	/*
+	 * Increment a date field's value
+	 */
+	incDate: (val) => {
+		let date = new Date(val);
+		date.setDate(date.getDate() + 1);
+		return date.toJSON().slice(0, 10);
+	},
+	/*
+	 * Decrement a date field's value
+	 */
+	decDate: (val) => {
+		let date = new Date(val);
+		date.setDate(date.getDate() - 1);
+		return date.toJSON().slice(0, 10);
 	}
 };
