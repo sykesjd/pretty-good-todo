@@ -3,7 +3,7 @@
  */
 'use strict';
 
-let db, todos, backup;
+let db, todos, backup, lastRollover;
 
 /*
  * Database operations provided to NodeJS server
@@ -24,6 +24,7 @@ module.exports = {
 					prefix: 'backups/todos'
 				}
 			});
+			lastRollover = tools.getAbsDate('today');
 			todos.createIndex({ date: 1 }, { expireAfterSeconds: tools.expiration() }, (err, res) => {
 				if (err) throw err;
 				callback();
@@ -31,14 +32,26 @@ module.exports = {
 		});
 	},
 	/*
-	 * Get todos scheduled on the given date
+	 * Get todos scheduled on the given date, rolling over if necessary
 	 */
 	getTodos: (date, callback) => {
 		let theDate = tools.getAbsDate(date);
-		todos.find({ 'date': theDate }).toArray().then((todoList) => {
-			todoList.sort((a,b) => a.order - b.order);
-			callback(todoList);
-		});
+		if (new Date(lastRollover) < new Date(theDate)) {
+			module.exports.rolloverTodos((success) => {
+				if (!success) throw 'Error rolling over todos';
+				lastRollover = theDate;
+				backup.transport();
+				todos.find({ 'date': theDate }).toArray().then((todoList) => {
+					todoList.sort((a,b) => a.order - b.order);
+					callback(todoList);
+				});
+			})
+		} else {
+			todos.find({ 'date': theDate }).toArray().then((todoList) => {
+				todoList.sort((a,b) => a.order - b.order);
+				callback(todoList);
+			});
+		}
 	},
 	/*
 	 * Create todo from request body, adding a GUID and ordering
@@ -135,13 +148,7 @@ module.exports = {
 		});
 	},
 	/*
-	 * Backs up the todo database
-	 */
-	backup: () => {
-		backup.transport();
-	},
-	/*
-	 * Close the connection to the database
+	 * Backup then close the connection to the database
 	 */
 	disconnect: () => {
 		backup.transport();

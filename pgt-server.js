@@ -14,7 +14,6 @@ startupOps.connectToDB(() => {
 	console.log('Starting server...');
 	startupOps.createServer();
 	startupOps.initializeAPI();
-	startupOps.initializeMidnightOp();
 	startupOps.startServer((port) => {
 		console.log('Server started and running on http://localhost:' + port + '/');
 		startupOps.initializeShutdownHandler();

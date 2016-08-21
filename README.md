@@ -35,20 +35,7 @@ You can test these endpoints apart from the client interface using an applicatio
 
 ### Todo Rollover Behavior
 
-Like GoodTodo, at every midnight (local time), this application rolls over undone todos from past days into the current day. This action is also performed at application startup.
-
-## Importing from GoodTodo
-
-This repository contains a script to import your GoodTodo data into the PrettyGoodTodo todo database. To import your GoodTodo data, perform the following steps:
-
-1. After logging into GoodTodo, go to Preferences -> One-Time Email Export.
-2. Under "Send in which format?", select "Comma-separated data, in an attachment".
-3. Under "Select the range of todos to export", select "All of your todos - past, present, and future".
-4. Click "Send Export", then log into your email to find the resulting email.
-5. Download the CSV attachment in the email into this directory.
-6. Navigate to this directory in your command line and execute the command `node import.js <csvFileName>`, replacing `<csvFileName>` with the name of your CSV file.
-
-Upon completion of the import script, your todos should be viewable in PrettyGoodTodo.
+Like GoodTodo, this application rolls over undone todos from past days into the current day. This action is performed at application startup and when the GET endpoint is invoked on a day after the last rollover.
 
 ## Contents
 
@@ -93,8 +80,15 @@ If you wish to use a different back-end than MongoDB, then you must create your 
 - `rolloverTodos(callback)`: changes the date of all undone todos from the past to today and returns whether the operation was successful via `callback(success)`
 - `disconnect()`: closes the connection to your database
 
-## Future Work
+## Importing from GoodTodo
 
-The following list of future work items is up to date as of 20 August 2016:
+This repository contains a script to import your GoodTodo data into the PrettyGoodTodo todo database. To import your GoodTodo data, perform the following steps:
 
-- **Midnight test**: I have yet to test to see if the midnight operation will occur if the computer on which an instance is running is sleeping.
+1. After logging into GoodTodo, go to Preferences -> One-Time Email Export.
+2. Under "Send in which format?", select "Comma-separated data, in an attachment".
+3. Under "Select the range of todos to export", select "All of your todos - past, present, and future".
+4. Click "Send Export", then log into your email to find the resulting email.
+5. Download the CSV attachment in the email into this directory.
+6. Navigate to this directory in your command line and execute the command `node import.js <csvFileName>`, replacing `<csvFileName>` with the name of your CSV file.
+
+Upon completion of the import script, your todos should be viewable in PrettyGoodTodo.

@@ -6,7 +6,7 @@
 const express = require('express');
 const dbOps = require('./database.js');
 const port = 3000;
-let app, server, midnightOp;
+let app, server;
 
 /*
  * Startup functions provided to NodeJS server
@@ -39,17 +39,6 @@ module.exports = {
 		tools.initPUT();
 		tools.initPOST();
 		tools.initDELETE();
-	},
-	/*
-	 * Initialize operation occurring every midnight to roll over undone todos
-	 */
-	initializeMidnightOp: () => {
-		midnightOp = require('node-schedule').scheduleJob({ hour: 0, minute: 0 }, () => {
-			dbOps.rolloverTodos((success) => {
-				if (!success) throw "Error rolling over yesterday's undone todos to today";
-				dbOps.backup();
-			});
-		});
 	},
 	/*
 	 * Start and return the express server
@@ -128,7 +117,6 @@ const tools = {
 	 */
 	shutdown: () => {
 		console.log('Shutting down...');
-		midnightOp.cancel();
 		dbOps.disconnect();
 		server.close();
 		process.exit(0);
