@@ -24,10 +24,12 @@ module.exports = {
 					prefix: 'backups/todos'
 				}
 			});
-			lastRollover = tools.getAbsDate('today');
-			todos.createIndex({ date: 1 }, { expireAfterSeconds: tools.expiration() }, (err, res) => {
-				if (err) throw err;
-				callback();
+			tools.rolloverTodos((success) => {
+				if (!success) throw 'Error rolling over todos';
+				todos.createIndex({ date: 1 }, { expireAfterSeconds: tools.expiration() }, (err, res) => {
+					if (err) throw err;
+					callback();
+				});
 			});
 		});
 	},
@@ -37,20 +39,13 @@ module.exports = {
 	getTodos: (date, callback) => {
 		let theDate = tools.getAbsDate(date);
 		if (new Date(lastRollover) < new Date(theDate)) {
-			module.exports.rolloverTodos((success) => {
+			tools.rolloverTodos((success) => {
 				if (!success) throw 'Error rolling over todos';
-				lastRollover = theDate;
 				backup.transport();
-				todos.find({ 'date': theDate }).toArray().then((todoList) => {
-					todoList.sort((a,b) => a.order - b.order);
-					callback(todoList);
-				});
-			})
-		} else {
-			todos.find({ 'date': theDate }).toArray().then((todoList) => {
-				todoList.sort((a,b) => a.order - b.order);
-				callback(todoList);
+				tools.get(theDate, callback);
 			});
+		} else {
+			tools.get(theDate, callback);
 		}
 	},
 	/*
@@ -80,25 +75,16 @@ module.exports = {
 					todos.find({ 'date': todo[0].date }).toArray().then((oldDateTodos) => {
 						oldDateTodos.forEach((odt) => {
 							if (odt.order > todo[0].order) {
-								todos.updateOne({ '_id': odt._id }, { $set: { 'order': odt.order - 1 } }, {}, (e, r) => {
-									if (e) throw e;
-									if (result.result.ok !== 1) throw 'Error redating';
-								});
+								tools.adjustTodo(dt);
 							}
 						});
 					});
 					todos.find({ 'date': body.date }).toArray().then((newDateTodos) => {
 						body.order = newDateTodos.length + 1;
-						todos.updateOne({ '_id': id }, { $set: body }, {}, (error, result) => {
-							if (error) throw error;
-							callback(result.result.ok === 1);
-						});
+						tools.post(id, body, callback);
 					});
 				} else {
-					todos.updateOne({ '_id': id }, { $set: body }, {}, (error, result) => {
-						if (error) throw error;
-						callback(result.result.ok === 1);
-					});
+					tools.post(id, body, callback);
 				}
 			}
 		});
@@ -114,10 +100,7 @@ module.exports = {
 				todos.find({ 'date': todo[0].date }).toArray().then((dateTodos) => {
 					dateTodos.forEach((dt) => {
 						if (dt.order > todo[0].order) {
-							todos.updateOne({ '_id': dt._id }, { $set: { 'order': dt.order - 1 } }, {}, (e, r) => {
-								if (e) throw e;
-								if (r.result.ok !== 1) throw 'Error adjusting todos around deleted todo';
-							});
+							tools.adjustTodo(dt);
 						}
 					});
 					todos.deleteOne({ _id: id }, {}, (error, result) => {
@@ -126,25 +109,6 @@ module.exports = {
 					});
 				});
 			}
-		});
-	},
-	/*
-	 * Move undone todos from the past to today
-	 * Throws an error if operation unsuccessful
-	 */
-	rolloverTodos: (callback) => {
-		let today = tools.getAbsDate('today');
-		let success = true;
-		todos.find({ 'date': today }).toArray().then((existingTodos) => {
-			todos.find({ 'date': { $lt: today}, 'done': false }).toArray().then((rollingOver) => {
-				rollingOver.forEach((r, i) => {
-					todos.updateOne({ '_id': r._id }, { $set: { 'date': today, 'order': existingTodos.length + i } }, {}, (error, result) => {
-						if (error) throw error;
-						success = success && (result.matchedCount === 0 || result.result.ok === 1);
-					});
-				});
-				callback(success);
-			});
 		});
 	},
 	/*
@@ -160,6 +124,51 @@ module.exports = {
  * Helper functions for the database operations above
  */
 const tools = {
+	/*
+	 * Move undone todos from the past to today
+	 */
+	rolloverTodos: (callback) => {
+		lastRollover = tools.getAbsDate('today');
+		let success = true;
+		todos.find({ 'date': lastRollover }).toArray().then((existingTodos) => {
+			todos.find({ 'date': { $lt: lastRollover }, 'done': false }).toArray().then((rollingOver) => {
+				rollingOver.forEach((r, i) => {
+					todos.updateOne({ '_id': r._id }, { $set: { 'date': lastRollover, 'order': existingTodos.length + i } }, {}, (error, result) => {
+						if (error) throw error;
+						success = success && (result.matchedCount === 0 || result.result.ok === 1);
+					});
+				});
+				callback(success);
+			});
+		});
+	},
+	/*
+	 * Perform get operation on the database
+	 */
+	get: (theDate, callback) => {
+		todos.find({ 'date': theDate }).toArray().then((todoList) => {
+			todoList.sort((a,b) => a.order - b.order);
+			callback(todoList);
+		});
+	},
+	/*
+	 * Perform post operation on the database
+	 */
+	post: (id, body, callback) => {
+		todos.updateOne({ '_id': id }, { $set: body }, {}, (error, result) => {
+			if (error) throw error;
+			callback(result.result.ok === 1);
+		});
+	},
+	/*
+	 * Decrement order of given todo
+	 */
+	adjustTodo: (dt) => {
+		todos.updateOne({ '_id': dt._id }, { $set: { 'order': dt.order - 1 } }, {}, (e, r) => {
+			if (e) throw e;
+			if (r.result.ok !== 1) throw 'Error adjusting surrounding todos';
+		});
+	},
 	/*
 	 * Specify the expiration time for records in seconds
 	 */

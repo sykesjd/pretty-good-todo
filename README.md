@@ -37,6 +37,10 @@ You can test these endpoints apart from the client interface using an applicatio
 
 Like GoodTodo, this application rolls over undone todos from past days into the current day. This action is performed at application startup and when the GET endpoint is invoked on a day after the last rollover.
 
+### Automated Database backups
+
+The MongoDB todo database is automatically backed up by this application on every daily rollover and on application shutdown. Backups are placed in a `backups` directory and can be used to transfer a database from one computer to another (see MongoDB documentation).
+
 ## Contents
 
 - `pgt-server.js`: the main NodeJS server script - connects to the database and starts up the server and API
@@ -77,7 +81,6 @@ If you wish to use a different back-end than MongoDB, then you must create your 
 		}
 		```
 - `deleteTodo(id, callback)`: deletes the todo with the given id from your database and returns whether the operation was successful via `callback(success)`
-- `rolloverTodos(callback)`: changes the date of all undone todos from the past to today and returns whether the operation was successful via `callback(success)`
 - `disconnect()`: closes the connection to your database
 
 ## Importing from GoodTodo

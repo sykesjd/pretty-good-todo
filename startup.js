@@ -13,15 +13,10 @@ let app, server;
  */
 module.exports = {
 	/*
-	 * Connect to and roll over todos in database
+	 * Connect to database
 	 */
 	connectToDB: (callback) => {
-		dbOps.connect(() => {
-			dbOps.rolloverTodos((success) => {
-				if (!success) throw "Error rolling over undone todos to today";
-				callback();
-			});
-		});
+		dbOps.connect(() => callback());
 	},
 	/*
 	 * Create server to serve static content
