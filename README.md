@@ -60,7 +60,7 @@ If you wish to use a different back-end than MongoDB, then you must create your 
 - `getTodos(date, callback)`: gets the todos for the given date from your database and returns the list of todos via `callback(todoList)`
 - `createTodo(body, callback)`: adds a todo to your database from the data in the request body and returns whether the operation was successful via `callback(success)`
 	- Request body format (your function must add fields `_id` and `order`):
-		```javascript
+		```
 		{
 			'date': 'dateISOString',
 			'title': 'todoTitle',
@@ -70,7 +70,7 @@ If you wish to use a different back-end than MongoDB, then you must create your 
 		```
 - `updateTodo(id, body, callback)`: updates the todo with the given id in your database using the data in the request body and returns whether the operation was successful via `callback(success)`
 	- Request body format:
-		```javascript
+		```
 		{
 			'_id': 'GUID',
 			'date': 'dateISOString',
