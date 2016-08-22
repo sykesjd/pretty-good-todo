@@ -133,7 +133,7 @@ const tools = {
 		todos.find({ 'date': lastRollover }).toArray().then((existingTodos) => {
 			todos.find({ 'date': { $lt: lastRollover }, 'done': false }).toArray().then((rollingOver) => {
 				rollingOver.forEach((r, i) => {
-					todos.updateOne({ '_id': r._id }, { $set: { 'date': lastRollover, 'order': existingTodos.length + i } }, {}, (error, result) => {
+					todos.updateOne({ '_id': r._id }, { $set: { 'date': lastRollover, 'order': existingTodos.length + i + 1 } }, {}, (error, result) => {
 						if (error) throw error;
 						success = success && (result.matchedCount === 0 || result.result.ok === 1);
 					});
