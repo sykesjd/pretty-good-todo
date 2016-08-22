@@ -9,7 +9,7 @@ const ajaxOps = {
 	 */
 	getTodos: (date, callback) => {
 		$.ajax({
-			url: apiURLs.GET + date,
+			url: location.origin + apiURLs.GET + date,
 			type: 'get',
 			success: (data) => callback(data),
 			error: () => {
@@ -22,7 +22,7 @@ const ajaxOps = {
 	 */
 	createTodo: (callback) => {
 		$.ajax({
-			url: apiURLs.PUT,
+			url: location.origin + apiURLs.PUT,
 			type: 'put',
 			data: JSON.stringify(ajaxTools.newTodo()),
 			headers: {
@@ -39,7 +39,7 @@ const ajaxOps = {
 	 */
 	updateTodo: (li, editBoxUsed, callback) => {
 		$.ajax({
-			url: apiURLs.POST + li.attr('data-id'),
+			url: location.origin + apiURLs.POST + li.attr('data-id'),
 			type: 'post',
 			data: JSON.stringify(ajaxTools.todoFromEl(li, editBoxUsed)),
 			headers: {
@@ -56,7 +56,7 @@ const ajaxOps = {
 	 */
 	deleteTodo: (li, callback) => {
 		$.ajax({
-			url: apiURLs.DELETE + li.attr('data-id'),
+			url: location.origin + apiURLs.DELETE + li.attr('data-id'),
 			type: 'delete',
 			success: () => callback(),
 			error: () => {
@@ -70,10 +70,10 @@ const ajaxOps = {
  * URL bases for the API endpoints
  */
 const apiURLs = {
-	GET: 'http://localhost:3000/v1/todos/',
-	PUT: 'http://localhost:3000/v1/new',
-	POST: 'http://localhost:3000/v1/update/',
-	DELETE: 'http://localhost:3000/v1/delete/'
+	GET: '/v1/todos/',
+	PUT: '/v1/new',
+	POST: '/v1/update/',
+	DELETE: '/v1/delete/'
 };
 
 /*
