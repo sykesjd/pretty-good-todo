@@ -3,6 +3,7 @@
  */
 'use strict';
 
+const Dumper = require('mongo-dumper').DatabaseToFileDumper;
 let db, todos, backup, lastRollover;
 
 /*
@@ -17,24 +18,15 @@ module.exports = {
 			if (error) throw error;
 			db = database;
 			todos = db.collection('todos');
-			backup = new (require('mongo-dumper').DatabaseToFileDumper)({
-				hosts: 'localhost:27017',
-				output: {
-					timestampLabel: 'YYYY-MM-DD_HH-mm-ss',
-					prefix: 'backups/todos'
-				}
-			});
+			tools.initializeDumper();
 			tools.rolloverTodos((success) => {
 				if (!success) throw 'Error rolling over todos';
-				todos.createIndex({ date: 1 }, { expireAfterSeconds: tools.expiration() }, (err, res) => {
-					if (err) throw err;
-					callback();
-				});
+				callback();
 			});
 		});
 	},
 	/*
-	 * Get todos scheduled on the given date, rolling over if necessary
+	 * Get todos scheduled on the given date, rolling over and backing up if necessary
 	 */
 	getTodos: (date, callback) => {
 		let theDate = tools.getAbsDate(date);
@@ -42,6 +34,7 @@ module.exports = {
 			tools.rolloverTodos((success) => {
 				if (!success) throw 'Error rolling over todos';
 				backup.transport();
+				tools.initializeDumper();
 				tools.get(theDate, callback);
 			});
 		} else {
@@ -125,11 +118,25 @@ module.exports = {
  */
 const tools = {
 	/*
-	 * Move undone todos from the past to today
+	 *
+	 */
+	initializeDumper: () => {
+		backup = new Dumper({
+			hosts: 'localhost:27017',
+			output: {
+				timestampLabel: 'YYYY-MM-DD_HH-mm-ss',
+				prefix: 'backups/todos'
+			}
+		});
+	},
+	/*
+	 * Move undone todos from the past to today and delete done todos older than 60 days
 	 */
 	rolloverTodos: (callback) => {
 		lastRollover = tools.getAbsDate('today');
 		let success = true;
+		let expDate = new Date(lastRollover);
+		expDate.setDate(expDate.getDate() - 60);
 		todos.find({ 'date': lastRollover }).toArray().then((existingTodos) => {
 			todos.find({ 'date': { $lt: lastRollover }, 'done': false }).toArray().then((rollingOver) => {
 				rollingOver.forEach((r, i) => {
@@ -138,7 +145,10 @@ const tools = {
 						success = success && (result.matchedCount === 0 || result.result.ok === 1);
 					});
 				});
-				callback(success);
+				todos.deleteMany({ 'date': { $lt: expDate.toISOString() }, 'done': true }, {}, (e, r) => {
+					if (e) throw e;
+					callback(success && (r.matchedCount === 0 || r.result.ok === 1));
+				});
 			});
 		});
 	},
@@ -169,10 +179,6 @@ const tools = {
 			if (r.result.ok !== 1) throw 'Error adjusting surrounding todos';
 		});
 	},
-	/*
-	 * Specify the expiration time for records in seconds
-	 */
-	expiration: () => 60 * 60 * 24 * 60,
 	/*
 	 * Creates todo object from body of request
 	 */

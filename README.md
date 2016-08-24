@@ -41,7 +41,7 @@ You can test these endpoints apart from the client interface using an applicatio
 
 ### Todo Rollover Behavior
 
-Like GoodTodo, this application rolls over undone todos from past days into the current day. This action is performed at application startup and when the GET endpoint is invoked on a day after the last rollover.
+Like GoodTodo, this application rolls over undone todos from past days into the current day and deletes done todos that are older than 60 days. This action is performed at application startup and when the GET endpoint is invoked on a day after the last rollover.
 
 ### Automated Database Backups
 
