@@ -59,7 +59,7 @@ const tools = {
 	 */
 	shutdown: () => {
 		queue.push((task) => {
-			console.log('Importing ' + count + ' todos');
+			console.log('Imported ' + count + ' todos');
 			dbOps.disconnect();
 			queue.close();
 			process.exit(0);

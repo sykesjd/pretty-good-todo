@@ -24,7 +24,7 @@ module.exports = {
 		});
 	},
 	/*
-	 * Get todos scheduled on the given date, rolling over and backing up if necessary
+	 * Get todos scheduled on the given date, rolling over if necessary
 	 */
 	getTodos: (date, callback) => {
 		let theDate = tools.getAbsDate(date);
@@ -92,7 +92,7 @@ module.exports = {
 							tools.adjustTodo(dt);
 						}
 					});
-					todos.deleteOne({ _id: id }, {}, (error, result) => {
+					todos.deleteOne({ '_id': id }, {}, (error, result) => {
 						if (error) throw error;
 						callback(result.result.ok === 1);
 					});
