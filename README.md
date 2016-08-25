@@ -4,7 +4,7 @@ PrettyGoodTodo is a local-use knock-off of GoodTodo, a todo application which al
 
 This application is intended for use by a single user per instance and does not aim to be a production application for a multi-user base. It merely provides a simple alternative for those not wishing to pay GoodTodo's subscription fees.
 
-This work is protected under the Creative Commons BY-NC-SA 4.0 license, which stipulates that this work can be shared and adapted upon freely so long as the original creator is attributed, it is used for non-commercial purposes, and it is shared under the same license. Contact me if you have any questions regarding these conditions.
+This work is protected under the Creative Commons BY-NC-SA 4.0 license, which stipulates that this work can be shared and adapted upon freely so long as the original creator is attributed, it is used for non-commercial purposes, and it is shared under the same license. Contact Jesse if you have any questions regarding these conditions.
 
 ## Installation
 
@@ -41,7 +41,7 @@ You can test these endpoints apart from the client interface using an applicatio
 
 ### Todo Rollover Behavior
 
-Like GoodTodo, this application rolls over undone todos from past days into the current day and deletes done todos that are older than 60 days. This action is performed at application startup and when the GET endpoint is invoked on a day after the last rollover.
+This application rolls over undone todos from past days into the current day like GoodTodo, and also deletes done todos that are older than 60 days. These actions are performed at application startup and when the GET endpoint is invoked on a day after the last rollover.
 
 ## Contents
 
@@ -51,8 +51,9 @@ Like GoodTodo, this application rolls over undone todos from past days into the 
 - `import.js`: NodeJS script to import data from GoodTodo
 - `index.html`: the client-facing application page
 - `index.js`: the client-side script used by `index.html` to attach event listeners and initialize the page to show today's todos
+- `todo.js`: client-side script through which the client adds todos and their accompanying event listeners to the page
 - `ajax.js`: client-side script through which the client application interfaces with the server's API
-- Shell scripts: scripts used by the npm package to start, stop, and test this application (hence the necessity for PowerShell on Windows); located in the `scripts` directory
+- `.sh` scripts: shell scripts used by the npm package to start, restart, stop, and test this application (hence the necessity for PowerShell on Windows); located in the `scripts` directory
 
 ### Using a different database
 
@@ -96,4 +97,4 @@ This repository contains a script to import your GoodTodo data into the PrettyGo
 5. Download the CSV attachment in the email into this directory.
 6. Navigate to this directory in your command line and execute the command `node import.js <csvFileName>`, replacing `<csvFileName>` with the name of your CSV file.
 
-Upon completion of the import script, your todos should be viewable in PrettyGoodTodo.
+Upon completion of the import script, your todos should be viewable in PrettyGoodTodo. The script will still work if you implement your own `database.js` as detailed above.
