@@ -3,8 +3,7 @@
  */
 'use strict';
 
-const Dumper = require('mongo-dumper').DatabaseToFileDumper;
-let db, todos, backup, lastRollover;
+let db, todos, lastRollover;
 
 /*
  * Database operations provided to NodeJS server
@@ -18,7 +17,6 @@ module.exports = {
 			if (error) throw error;
 			db = database;
 			todos = db.collection('todos');
-			tools.initializeDumper();
 			tools.rolloverTodos((success) => {
 				if (!success) throw 'Error rolling over todos';
 				callback();
@@ -33,8 +31,6 @@ module.exports = {
 		if (new Date(lastRollover) < new Date(tools.getAbsDate('today'))) {
 			tools.rolloverTodos((success) => {
 				if (!success) throw 'Error rolling over todos';
-				backup.transport();
-				tools.initializeDumper();
 				tools.get(theDate, callback);
 			});
 		} else {
@@ -105,10 +101,9 @@ module.exports = {
 		});
 	},
 	/*
-	 * Backup then close the connection to the database
+	 * Close the connection to the database
 	 */
 	disconnect: () => {
-		backup.transport();
 		db.close();
 	}
 };
@@ -117,18 +112,6 @@ module.exports = {
  * Helper functions for the database operations above
  */
 const tools = {
-	/*
-	 *
-	 */
-	initializeDumper: () => {
-		backup = new Dumper({
-			hosts: 'localhost:27017',
-			output: {
-				timestampLabel: 'YYYY-MM-DD_HH-mm-ss',
-				prefix: 'backups/todos'
-			}
-		});
-	},
 	/*
 	 * Move undone todos from the past to today and delete done todos older than 60 days
 	 */
