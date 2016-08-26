@@ -71,27 +71,15 @@ const startup = {
 			switch(key.which) {
 				case keys.LARROW:
 				case keys.K:
-					if ($('#edit').is(':visible')) {
-						$('#editPrev').click();
-					} else {
-						$('#prev').click();
-					}
+					$($('#edit').is(':visible') ? '#editPrev' : '#prev').click();
 					break;
 				case keys.RARROW:
 				case keys.J:
-					if ($('#edit').is(':visible')) {
-						$('#editNext').click();
-					} else {
-						$('#next').click();
-					}
+					$($('#edit').is(':visible') ? '#editNext' : '#next').click();
 					break;
 				case keys.ESCAPE:
 				case keys.T:
-					if ($('#edit').is(':visible')) {
-						$('#editDate').val(dateTools.getToday()).change();
-					} else {
-						startup.gotoToday();
-					}
+					$($('#edit').is(':visible') ? '#editDate' : '#dateSel').val(dateTools.getToday()).change();
 					break;
 			}
 		});
@@ -115,6 +103,7 @@ const keys = {
 	K: 75,
 	T: 84
 };
+
 /*
  * Date manipulation functions used by the startup operations
  */
