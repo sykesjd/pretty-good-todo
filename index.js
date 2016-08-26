@@ -6,6 +6,7 @@
 $(() => {
 	startup.attachDateListeners();
 	startup.attachButtonListeners();
+	startup.attachKeyboardListeners();
 	startup.gotoToday();
 });
 
@@ -63,6 +64,39 @@ const startup = {
 		});
 	},
 	/*
+	 * Attach listeners to keyboard events
+	 */
+	attachKeyboardListeners: () => {
+		$(document).keydown((key) => {
+			switch(key.which) {
+				case keys.LARROW:
+				case keys.K:
+					if ($('#edit').is(':visible')) {
+						$('#editPrev').click();
+					} else {
+						$('#prev').click();
+					}
+					break;
+				case keys.RARROW:
+				case keys.J:
+					if ($('#edit').is(':visible')) {
+						$('#editNext').click();
+					} else {
+						$('#next').click();
+					}
+					break;
+				case keys.ESCAPE:
+				case keys.T:
+					if ($('#edit').is(':visible')) {
+						$('#editDate').val(dateTools.getToday()).change();
+					} else {
+						startup.gotoToday();
+					}
+					break;
+			}
+		});
+	},
+	/*
 	 * Set date to today and fetch today's todos
 	 */
 	gotoToday: () => {
@@ -70,6 +104,17 @@ const startup = {
 	}
 };
 
+/*
+ * Keycodes for event-handling keys
+ */
+const keys = {
+	ESCAPE: 27,
+	LARROW: 37,
+	RARROW: 39,
+	J: 74,
+	K: 75,
+	T: 84
+};
 /*
  * Date manipulation functions used by the startup operations
  */
