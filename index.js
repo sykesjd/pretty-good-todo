@@ -68,6 +68,7 @@ const startup = {
 	 */
 	attachKeyboardListeners: () => {
 		$(document).keydown((key) => {
+			if ($('input').is(':focus') || $('textarea').is(':focus')) return;
 			switch(key.which) {
 				case keys.LARROW:
 				case keys.K:
@@ -88,7 +89,7 @@ const startup = {
 	 * Set date to today and fetch today's todos
 	 */
 	gotoToday: () => {
-		$('#dateSel').val(dateTools.getToday()).change();
+		$(document).trigger(jQuery.Event('keydown', { which: keys.T }));
 	}
 };
 
