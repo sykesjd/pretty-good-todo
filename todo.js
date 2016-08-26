@@ -30,7 +30,9 @@ const todoOps = {
 								<span class="glyphicon glyphicon-remove-sign"></span>\
 							</span>\
 						</span>\
-						<p class="message">' + todo.body.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</p>\
+						<span class="message container">\
+							<p>' + todo.body.replace(/(?:\r\n|\r|\n)/g, '</p><p>') + '</p>\
+						</span>\
 					   </li>')
 };
 
