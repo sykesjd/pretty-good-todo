@@ -6,19 +6,14 @@
 		<title>PrettyGoodTodo</title>
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 		<link rel="stylesheet" href="//bootswatch.com/cyborg/bootstrap.min.css">
-		<style type="text/css">
-			.checkbox label { font-size: 1.2em; }
-			.message { display: none; }
-			.titleBox, .messageBox { width: 15em; }
-			#edit { display: none; }
-		</style>
+		<link rel="stylesheet" href="index.css">
 	</head>
 	<body>
 		<header class="jumbotron">
-			<div class="container">
+			<hgroup class="container">
 				<h1>Pretty Good Todo</h1>
 				<h2 id="errorReport">&nbsp;</h2>
-			</div>
+			</hgroup>
 		</header>
 		<main>
 			<div class="container">
@@ -44,8 +39,8 @@
 								<input type="text" class="form-control" id="editTitle" placeholder="Title"/>
 								<textarea class="form-control" id="editMessage" placeholder="Details"></textarea>
 								<div class="btn-group">
-									<button type="button" class="btn btn-default" id="editSubmit" id="newTodo">Update Todo</button>
-									<button type="button" class="btn btn-default" id="editCancel" id="newTodo">Cancel</button>
+									<button type="button" class="btn btn-default" id="editSubmit">Update Todo</button>
+									<button type="button" class="btn btn-default" id="editCancel">Cancel</button>
 								</div>
 							</div>
 						</section>

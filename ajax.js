@@ -7,20 +7,18 @@ const ajaxOps = {
 	/*
 	 * Get todos for the given date
 	 */
-	getTodos: (date, callback) => {
+	getTodos: (date, callback, error) => {
 		$.ajax({
 			url: location.origin + apiURLs.GET + date,
 			type: 'get',
 			success: (data) => callback(data),
-			error: () => {
-				$('#errorReport').text('Error fetching todos; reload the page');
-			}
+			error: () => error()
 		});
 	},
 	/*
 	 * Create todo from data in new todo form
 	 */
-	createTodo: (callback) => {
+	createTodo: (callback, error) => {
 		$.ajax({
 			url: location.origin + apiURLs.PUT,
 			type: 'put',
@@ -29,15 +27,13 @@ const ajaxOps = {
 				'Content-Type': 'application/json'
 			},
 			success: () => callback(),
-			error: () => {
-				$('#errorReport').text('Error creating todo; reload the page');
-			}
+			error: () => error()
 		});
 	},
 	/*
 	 * Update a given todo
 	 */
-	updateTodo: (li, editBoxUsed, callback) => {
+	updateTodo: (li, editBoxUsed, callback, error) => {
 		$.ajax({
 			url: location.origin + apiURLs.POST + li.attr('data-id'),
 			type: 'post',
@@ -46,22 +42,18 @@ const ajaxOps = {
 				'Content-Type': 'application/json'
 			},
 			success: () => callback(),
-			error: () => {
-				$('#errorReport').text('Error updating todo; reload the page');
-			}
+			error: () => error()
 		});
 	},
 	/*
 	 * Delete a given todo
 	 */
-	deleteTodo: (li, callback) => {
+	deleteTodo: (li, callback, error) => {
 		$.ajax({
 			url: location.origin + apiURLs.DELETE + li.attr('data-id'),
 			type: 'delete',
 			success: () => callback(),
-			error: () => {
-				$('#errorReport').text('Error deleting todo; reload the page');
-			}
+			error: () => error()
 		});
 	}
 };

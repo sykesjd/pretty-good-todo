@@ -26,7 +26,7 @@ const startup = {
 					todoOps.attachElListeners(element);
 					element.appendTo('#todos');
 				});
-			});
+			}, () => $('#errorReport').text('Error retrieving todos; reload the page'));
 		});
 		$('#next').click(() => {
 			$('#dateSel').val((i, val) => dateTools.incDate(val)).change();
@@ -59,7 +59,7 @@ const startup = {
 					$('#newTitle').val('');
 					$('#newMessage').val('');
 					$('#dateSel').change();
-				});
+				}, () => $('#errorReport').text('Error creating todo; reload the page'));
 			}
 		});
 	},

@@ -1,6 +1,8 @@
 /**
  * Operations for creating and adding event listeners to a todo list item
  */
+'use strict';
+
 const todoOps = {
 	/*
 	 * Attach event listeners to a newly-created todo li
@@ -11,7 +13,7 @@ const todoOps = {
 		element.find('.glyphicon-chevron-down').click(() => todoTools.moveDown(element));
 		element.find('.glyphicon-info-sign').click(() => element.find('.message').toggle());
 		element.find('.glyphicon-edit').click((e) => todoTools.editTodo(element));
-		element.find('.glyphicon-remove-sign').click(() => ajaxOps.deleteTodo(element, () => $('#dateSel').change()));
+		element.find('.glyphicon-remove-sign').click(() => todoTools.deleteTodo(element));
 	},
 	/*
 	 * Create todo li from todo object
@@ -45,7 +47,9 @@ const todoTools = {
 	 */
 	markCompletion: (e, todoEl) => {
 		todoEl.attr('data-checked', e.target.checked);
-		ajaxOps.updateTodo(todoEl, false, () => $('#dateSel').change());
+		ajaxOps.updateTodo(todoEl, false,
+			() => $('#dateSel').change(),
+			() => $('#errorReport').text('Error updating todo status; reload the page'));
 	},
 	/*
 	 * Move a todo up in priority
@@ -56,8 +60,10 @@ const todoTools = {
 			previous.attr('data-order', parseInt(previous.attr('data-order')) + 1);
 			todoEl.attr('data-order', parseInt(todoEl.attr('data-order')) - 1);
 			ajaxOps.updateTodo(previous, false, () => {
-				ajaxOps.updateTodo(todoEl, false, () => $('#dateSel').change());
-			});
+				ajaxOps.updateTodo(todoEl, false,
+					() => $('#dateSel').change(),
+					() => $('#errorReport').text('Error reordering todos; reload the page'));
+			}, () => $('#errorReport').text('Error reordering todos; reload the page'));
 		}
 	},
 	/*
@@ -69,8 +75,10 @@ const todoTools = {
 			next.attr('data-order', parseInt(next.attr('data-order')) - 1);
 			todoEl.attr('data-order', parseInt(todoEl.attr('data-order')) + 1);
 			ajaxOps.updateTodo(next, false, () => {
-				ajaxOps.updateTodo(todoEl, false, () => $('#dateSel').change());
-			});
+				ajaxOps.updateTodo(todoEl, false,
+					() => $('#dateSel').change(),
+					() => $('#errorReport').text('Error reordering todos; reload the page'));
+			}, () => $('#errorReport').text('Error reordering todos; reload the page'));
 		}
 	},
 	/*
@@ -90,8 +98,16 @@ const todoTools = {
 					$('#edit').hide();
 					$('#new').show();
 					$('#dateSel').change();
-				});
+				}, () => $('#errorReport').text('Error updating todo; reload the page'));
 			}
 		});
+	},
+	/*
+	 * Delete the chosen todo
+	 */
+	deleteTodo: (todoEl) => {
+		ajaxOps.deleteTodo(todoEl,
+			() => $('#dateSel').change(),
+			() => $('#errorReport').text('Error deleting todo; reload the page'));
 	}
 };
