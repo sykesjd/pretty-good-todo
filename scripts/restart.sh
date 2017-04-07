@@ -1,3 +1,3 @@
-pkill -2 -f "node pgt-server.js"
-nohup node pgt-server.js > pgt-server.log &
+forever stop pgt-server.js
+forever start --minUptime 1000 --spinSleepTime 1000 --uid "pgt" -o pgt-server.log -a -l forever.log pgt-server.js
 echo "PrettyGoodTodo restarted"

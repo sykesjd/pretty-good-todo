@@ -1,2 +1,2 @@
-pkill -2 -f "node pgt-server.js"
+forever stop pgt-server.js
 echo "PrettyGoodTodo stopped"
