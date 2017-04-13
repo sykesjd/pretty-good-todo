@@ -33,9 +33,7 @@ module.exports = {
 				if (!success) throw 'Error rolling over todos';
 				tools.get(theDate, callback);
 			});
-		} else {
-			tools.get(theDate, callback);
-		}
+		} else tools.get(theDate, callback);
 	},
 	/*
 	 * Create todo from request body, adding a GUID and ordering
@@ -56,16 +54,13 @@ module.exports = {
 	 */
 	updateTodo: (id, body, callback) => {
 		body = tools.todoFromBody(body);
-		todos.find({ '_id': id}).toArray().then((todo) => {
-			if (todo.length === 0) {
-				throw 'Todo to update not found';
-			} else {
+		todos.find({ '_id': id }).toArray().then((todo) => {
+			if (todo.length === 0) throw 'Todo to update not found';
+			else {
 				if (todo[0].date !== body.date) {
 					todos.find({ 'date': todo[0].date }).toArray().then((oldDateTodos) => {
 						oldDateTodos.forEach((odt) => {
-							if (odt.order > todo[0].order) {
-								tools.adjustTodo(dt);
-							}
+							if (odt.order > todo[0].order) tools.adjustTodo(odt);
 						});
 					});
 					todos.find({ 'date': body.date }).toArray().then((newDateTodos) => {
@@ -83,14 +78,11 @@ module.exports = {
 	 */
 	deleteTodo: (id, callback) => {
 		todos.find({ '_id': id }).toArray().then((todo) => {
-			if (todo.length === 0) {
-				throw 'Todo to delete not found';
-			} else {
+			if (todo.length === 0) throw 'Todo to delete not found';
+			else {
 				todos.find({ 'date': todo[0].date }).toArray().then((dateTodos) => {
 					dateTodos.forEach((dt) => {
-						if (dt.order > todo[0].order) {
-							tools.adjustTodo(dt);
-						}
+						if (dt.order > todo[0].order) tools.adjustTodo(dt);
 					});
 					todos.deleteOne({ '_id': id }, {}, (error, result) => {
 						if (error) throw error;
@@ -167,16 +159,14 @@ const tools = {
 	 */
 	todoFromBody: (body) => {
 		let today = tools.getAbsDate('today');
-		if (!body.done && new Date(body.date) < new Date(today)) {
-			body.date = today;
-		}
+		if (!body.done && new Date(body.date) < new Date(today)) body.date = today;
 		return body;
 	},
 	/*
 	 * Get todo date for given date object
 	 */
 	getAbsDate: (date) => {
-		let theDate = (date === 'today' ? new Date((new Date()).toDateString()) : new Date(date))
+		let theDate = (date === 'today' ? new Date((new Date()).toDateString()) : new Date(date));
 		theDate.setUTCHours(0, 0, 0, 0);
 		return theDate.toISOString();
 	},

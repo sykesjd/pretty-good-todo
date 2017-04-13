@@ -45,9 +45,7 @@ module.exports = {
 	 * Initialize shutdown handler to close database connection and server operations
 	 */
 	initializeShutdownHandler: () => {
-		if (process.platform === 'win32') {
-		  	tools.initWinWorkaround();
-		}
+		if (process.platform === 'win32') tools.initWinWorkaround();
 		process.on('SIGINT', () => tools.shutdown());
 	}
 };
