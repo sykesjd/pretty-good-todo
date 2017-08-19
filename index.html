@@ -1,65 +1,65 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width">
-		<title>PrettyGoodTodo</title>
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-		<link rel="stylesheet" href="//bootswatch.com/cyborg/bootstrap.min.css">
-		<link rel="stylesheet" href="index.css">
-	</head>
-	<body>
-		<header class="jumbotron">
-			<hgroup class="container">
-				<h1>Pretty Good Todo</h1>
-				<h2 id="errorReport">&nbsp;</h2>
-			</hgroup>
-		</header>
-		<main>
-			<div class="container">
-				<div class="row">
-					<div class="col-md-6">
-						<nav class="btn-group">
-							<button id="prev" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span></button>
-							<input type="date" id="dateSel" class="btn btn-default"/>
-							<button id="next" class="btn btn-default"><span class="glyphicon glyphicon-chevron-right"></span></button>
-						</nav>
-						<ul class="list-group" id="todos"></ul>
-					</div>
-					<div class="col-md-6">
-						<section id="edit">
-							<h4>Edit Todo</h4>
-							<div class="input-group">
-								<div class="btn-group">
-									<button id="editPrev" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span></button>
-									<input type="date" id="editDate" class="btn btn-default"/>
-									<button id="editNext" class="btn btn-default"><span class="glyphicon glyphicon-chevron-right"></span></button>
-								</div>
-								<br>
-								<input type="text" class="form-control" id="editTitle" placeholder="Title"/>
-								<textarea class="form-control" id="editMessage" placeholder="Details"></textarea>
-								<div class="btn-group">
-									<button type="button" class="btn btn-default" id="editSubmit">Update Todo</button>
-									<button type="button" class="btn btn-default" id="editCancel">Cancel</button>
-								</div>
-							</div>
-						</section>
-						<section id="new">
-							<h4>New Todo</h4>
-							<div class="input-group">
-								<input type="text" class="form-control" id="newTitle" placeholder="Title"/>
-								<textarea class="form-control" id="newMessage" placeholder="Details"></textarea>
-								<button type="button" class="btn btn-default" id="newSubmit">Add Todo</button>
-							</div>
-						</section>
-					</div>
-				</div>
-			</div>
-		</main>
-		<!--[if lt IE 9]><script src="//code.jquery.com/jquery-1.12.3.min.js"></script><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]--><!--[if gte IE 9]><!--><script src="//code.jquery.com/jquery-3.1.0.min.js"></script><!--<![endif]-->
-		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-		<script src="ajax.js"></script>
-		<script src="todo.js"></script>
-		<script src="index.js"></script>
-	</body>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>PrettyGoodTodo</title>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//bootswatch.com/cyborg/bootstrap.min.css">
+        <link rel="stylesheet" href="index.css">
+    </head>
+    <body>
+        <header class="jumbotron">
+            <hgroup class="container">
+                <h1>Pretty Good Todo</h1>
+                <h2 id="errorReport">&nbsp;</h2>
+            </hgroup>
+        </header>
+        <main>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <nav class="btn-group">
+                            <button id="prev" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span></button>
+                            <input type="date" id="dateSel" class="btn btn-default"/>
+                            <button id="next" class="btn btn-default"><span class="glyphicon glyphicon-chevron-right"></span></button>
+                        </nav>
+                        <ul class="list-group" id="todos"></ul>
+                    </div>
+                    <div class="col-md-6">
+                        <section id="edit">
+                            <h4>Edit Todo</h4>
+                            <div class="input-group">
+                                <div class="btn-group">
+                                    <button id="editPrev" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span></button>
+                                    <input type="date" id="editDate" class="btn btn-default"/>
+                                    <button id="editNext" class="btn btn-default"><span class="glyphicon glyphicon-chevron-right"></span></button>
+                                </div>
+                                <br>
+                                <input type="text" class="form-control" id="editTitle" placeholder="Title"/>
+                                <textarea class="form-control" id="editMessage" placeholder="Details"></textarea>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default" id="editSubmit">Update Todo</button>
+                                    <button type="button" class="btn btn-default" id="editCancel">Cancel</button>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="new">
+                            <h4>New Todo</h4>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="newTitle" placeholder="Title"/>
+                                <textarea class="form-control" id="newMessage" placeholder="Details"></textarea>
+                                <button type="button" class="btn btn-default" id="newSubmit">Add Todo</button>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!--[if lt IE 9]><script src="//code.jquery.com/jquery-1.12.3.min.js"></script><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]--><!--[if gte IE 9]><!--><script src="//code.jquery.com/jquery-3.1.0.min.js"></script><!--<![endif]-->
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src="ajax.js"></script>
+        <script src="todo.js"></script>
+        <script src="index.js"></script>
+    </body>
 </html>

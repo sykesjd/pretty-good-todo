@@ -10,12 +10,12 @@ const startupOps = require('./startup.js');
  */
 console.log('Connecting to todo database...');
 startupOps.connectToDB(() => {
-	console.log('Connected to todo database successfully');
-	console.log('Starting server...');
-	startupOps.createServer();
-	startupOps.initializeAPI();
-	startupOps.startServer((port) => {
-		console.log('Server started and running on http://localhost:' + port + '/');
-		startupOps.initializeShutdownHandler();
-	});
+    console.log('Connected to todo database successfully');
+    console.log('Starting server...');
+    startupOps.createServer();
+    startupOps.initializeAPI();
+    startupOps.startServer((port) => {
+        console.log('Server started and running on http://localhost:' + port + '/');
+        startupOps.initializeShutdownHandler();
+    });
 });
