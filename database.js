@@ -12,11 +12,11 @@ module.exports = {
     /*
      * Connect to and return the MongoDB database and todo collection
      */
-    connect: (callback) => {
-        require('mongodb').MongoClient.connect('mongodb://localhost:27017/todos', {}, (error, database) => {
+    connect: (config, callback) => {
+        require('mongodb').MongoClient.connect(config.connectionString, {}, (error, database) => {
             if (error) throw error;
             db = database;
-            todos = db.collection('todos');
+            todos = db.collection(config.collectionName);
             tools.rolloverTodos((success) => {
                 if (!success) throw 'Error rolling over todos';
                 callback();

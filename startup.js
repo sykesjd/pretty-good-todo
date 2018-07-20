@@ -5,7 +5,6 @@
 
 const express = require('express');
 const dbOps = require('./database.js');
-const port = 3000;
 let app, server;
 
 /*
@@ -15,8 +14,8 @@ module.exports = {
     /*
      * Connect to database
      */
-    connectToDB: (callback) => {
-        dbOps.connect(() => callback());
+    connectToDB: (config, callback) => {
+        dbOps.connect(config, () => callback());
     },
     /*
      * Create server to serve static content
@@ -38,8 +37,8 @@ module.exports = {
     /*
      * Start and return the express server
      */
-    startServer: (callback) => {
-        server = app.listen(port, () => callback(port));
+    startServer: (config, callback) => {
+        server = app.listen(config.port, () => callback(config.port));
     },
     /*
      * Initialize shutdown handler to close database connection and server operations
