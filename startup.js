@@ -4,6 +4,7 @@
 'use strict';
 
 const express = require('express');
+const favicon = require('serve-favicon');
 const dbOps = require('./database.js');
 let app, server;
 
@@ -24,6 +25,7 @@ module.exports = {
         app = express();
         app.use(require('body-parser').json());
         app.use('/', express.static(__dirname + '/'));
+        app.use(favicon(__dirname + '/favicon.ico'));
     },
     /*
      * Attach API listeners to server

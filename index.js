@@ -130,7 +130,7 @@ const dateTools = {
      */
     incDate: (val) => {
         let date = new Date(val);
-        date.setDate(date.getDate() + 1);
+        date.setUTCHours(date.getHours() + 24);
         return date.toJSON().slice(0, 10);
     },
     /*
@@ -138,7 +138,7 @@ const dateTools = {
      */
     decDate: (val) => {
         let date = new Date(val);
-        date.setDate(date.getDate() - 1);
+        date.setUTCHours(date.getHours() - 24);
         return date.toJSON().slice(0, 10);
     }
 };
