@@ -12,89 +12,65 @@ module.exports = {
     /*
      * Connect to and return the MongoDB database and todo collection
      */
-    connect: (config, callback) => {
-        require('mongodb').MongoClient.connect(config.connectionString, {}, (error, database) => {
-            if (error) throw error;
-            db = database;
-            todos = db.collection(config.collectionName);
-            tools.rolloverTodos((success) => {
-                if (!success) throw 'Error rolling over todos';
-                callback();
-            });
-        });
+    connect: async (config) => {
+        db = await require('mongodb').MongoClient.connect(config.connectionString, {});
+        todos = db.collection(config.collectionName);
+        if (!(await tools.rolloverTodos()))
+            throw 'Error rolling over todos';
     },
     /*
      * Get todos scheduled on the given date, rolling over if necessary
      */
-    getTodos: (date, callback) => {
+    getTodos: async (date) => {
         let theDate = tools.getAbsDate(date);
-        if (new Date(lastRollover) < new Date(tools.getAbsDate('today'))) {
-            tools.rolloverTodos((success) => {
-                if (!success) throw 'Error rolling over todos';
-                tools.get(theDate, callback);
-            });
-        } else tools.get(theDate, callback);
+        if (new Date(lastRollover) < new Date(tools.getAbsDate('today')) && !(await tools.rolloverTodos()))
+            throw 'Error rolling over todos';
+        return await tools.get(theDate);
     },
     /*
      * Create todo from request body, adding a GUID and ordering
      */
-    createTodo: (body, callback) => {
+    createTodo: async (body) => {
         body._id = tools.guid();
         body = tools.todoFromBody(body);
-        todos.find({ 'date': body.date }).toArray().then((dateTodos) => {
-            body.order = dateTodos.length + 1;
-            todos.insertOne(body, {}, (error, result) => {
-                if (error) throw error;
-                callback(result.result.ok === 1);
-            });
-        });
+        let dateTodos = await todos.find({ 'date': body.date }).toArray();
+        body.order = dateTodos.length + 1;
+        let insertResult = await todos.insertOne(body, {});
+        return insertResult.result.ok === 1;
     },
     /*
      * Update todo with ID from request body
      */
-    updateTodo: (id, body, callback) => {
-        if (id !== body._id) {
-            callback(false);
-            return;
-        }
+    updateTodo: async (id, body) => {
+        if (id !== body._id)
+            return false;
         body = tools.todoFromBody(body);
-        todos.find({ '_id': id }).toArray().then((todo) => {
-            if (todo.length === 0) throw 'Todo to update not found';
-            else {
-                if (todo[0].date !== body.date) {
-                    todos.find({ 'date': todo[0].date }).toArray().then((oldDateTodos) => {
-                        oldDateTodos.forEach((odt) => {
-                            if (odt.order > todo[0].order) tools.adjustTodo(odt);
-                        });
-                    });
-                    todos.find({ 'date': body.date }).toArray().then((newDateTodos) => {
-                        body.order = newDateTodos.length + 1;
-                        tools.post(id, body, callback);
-                    });
-                } else {
-                    tools.post(id, body, callback);
-                }
-            }
-        });
+        let todo = await todos.find({ '_id': id }).toArray();
+        if (todo.length === 0)
+            throw 'Todo to update not found';
+        if (todo[0].date !== body.date) {
+            let oldDateTodos = await todos.find({ 'date': todo[0].date }).toArray();
+            for (let odt of oldDateTodos)
+                if (odt.order > todo[0].order)
+                    await tools.adjustTodo(odt);
+            let newDateTodos = await todos.find({ 'date': body.date }).toArray();
+            body.order = newDateTodos.length + 1;
+        }
+        return await tools.post(id, body);
     },
     /*
      * Deletes todo with ID
      */
-    deleteTodo: (id, callback) => {
-        todos.find({ '_id': id }).toArray().then((todo) => {
-            if (todo.length === 0) throw 'Todo to delete not found';
-            else {
-                todos.find({ 'date': todo[0].date }).toArray().then((dateTodos) => {
-                    dateTodos.forEach((dt) => {
-                        if (dt.order > todo[0].order) tools.adjustTodo(dt);
-                    });
-                    todos.deleteOne({ '_id': id }, {}, (error, result) => {
-                        if (error) throw error;
-                        callback(result.result.ok === 1);
-                    });
-                });
-            }
-        });
+    deleteTodo: async (id) => {
+        let todo = await todos.find({ '_id': id }).toArray();
+        if (todo.length === 0)
+            throw 'Todo to delete not found';
+        let dateTodos = await todos.find({ 'date': todo[0].date }).toArray();
+        for (let dt of dateTodos)
+            if (dt.order > todo[0].order)
+                await tools.adjustTodo(dt);
+        let deleteResult = await todos.deleteOne({ '_id': id }, {});
+        return deleteResult.result.ok === 1;
     },
     /*
      * Close the connection to the database
@@ -111,59 +87,49 @@ const tools = {
     /*
      * Move undone todos from the past to today and delete done todos older than 60 days
      */
-    rolloverTodos: (callback) => {
+    rolloverTodos: async () => {
         lastRollover = tools.getAbsDate('today');
         let success = true;
         let expDate = new Date(lastRollover);
         expDate.setDate(expDate.getDate() - 60);
-        todos.find({ 'date': lastRollover }).toArray().then((existingTodos) => {
-            todos.find({ 'date': { $lt: lastRollover }, 'done': false }).toArray().then((rollingOver) => {
-                rollingOver.forEach((r, i) => {
-                    todos.updateOne({ '_id': r._id }, { $set: { 'date': lastRollover, 'order': existingTodos.length + i + 1 } }, {}, (error, result) => {
-                        if (error) throw error;
-                        success = success && (result.matchedCount === 0 || result.result.ok === 1);
-                    });
-                });
-                todos.deleteMany({ 'date': { $lt: expDate.toISOString() }, 'done': true }, {}, (e, r) => {
-                    if (e) throw e;
-                    callback(success && (r.matchedCount === 0 || r.result.ok === 1));
-                });
-            });
-        });
+        let existingTodos = await todos.find({ 'date': lastRollover }).toArray();
+        let rollingOver = await todos.find({ 'date': { $lt: lastRollover }, 'done': false }).toArray();
+        for (let i = 0; i < rollingOver.length; i++) {
+            let updateResult = await todos.updateOne({ '_id': rollingOver[i]._id }, { $set: { 'date': lastRollover, 'order': existingTodos.length + i + 1 } }, {});
+            success = success && (updateResult.matchedCount === 0 || updateResult.result.ok === 1);
+        }
+        let deleteResult = await todos.deleteMany({ 'date': { $lt: expDate.toISOString() }, 'done': true }, {});
+        return success && (deleteResult.matchedCount === 0 || deleteResult.result.ok === 1);
     },
     /*
      * Perform get operation on the database
      */
-    get: (theDate, callback) => {
-        todos.find({ 'date': theDate }).toArray().then((todoList) => {
-            todoList.sort((a,b) => a.order - b.order);
-            callback(todoList);
-        });
+    get: async (theDate) => {
+        let todoList = await todos.find({ 'date': theDate }).toArray();
+        return todoList.sort((a,b) => a.order - b.order);
     },
     /*
      * Perform post operation on the database
      */
-    post: (id, body, callback) => {
-        todos.updateOne({ '_id': id }, { $set: body }, {}, (error, result) => {
-            if (error) throw error;
-            callback(result.result.ok === 1);
-        });
+    post: async (id, body) => {
+        let updateResult = await todos.updateOne({ '_id': id }, { $set: body }, {});
+        return updateResult.result.ok === 1;
     },
     /*
      * Decrement order of given todo
      */
-    adjustTodo: (dt) => {
-        todos.updateOne({ '_id': dt._id }, { $set: { 'order': dt.order - 1 } }, {}, (e, r) => {
-            if (e) throw e;
-            if (r.result.ok !== 1) throw 'Error adjusting surrounding todos';
-        });
+    adjustTodo: async (dt) => {
+        let adjustResult = await todos.updateOne({ '_id': dt._id }, { $set: { 'order': dt.order - 1 } }, {});
+        if (adjustResult.result.ok !== 1)
+            throw 'Error adjusting surrounding todos';
     },
     /*
      * Creates todo object from body of request
      */
     todoFromBody: (body) => {
         let today = tools.getAbsDate('today');
-        if (!body.done && new Date(body.date) < new Date(today)) body.date = today;
+        if (!body.done && new Date(body.date) < new Date(today))
+            body.date = today;
         return body;
     },
     /*

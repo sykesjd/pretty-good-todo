@@ -18,11 +18,12 @@ let count = 0;
 /*
  * Connect to database then process CSV file
  */
-dbOps.connect(() => {
+(async () => {
+    await dbOps.connect();
     require('fast-csv').fromPath(process.argv[2], { headers: true })
         .on('data', (data) => tools.parseTodo(data))
         .on('end', () => tools.shutdown());
-});
+})();
 
 /*
  * CSV event handlers and helper functions
@@ -39,11 +40,10 @@ const tools = {
             'body': data['Body'],
             'done': data['Status'] === 'Done'
         };
-        queue.push((task) => {
-            dbOps.createTodo(newTodo, (success) => {
-                if (!success) throw 'Error importing todo';
-                task.done();
-            });
+        queue.push(async (task) => {
+            if (!(await dbOps.createTodo(newTodo)))
+                throw 'Error importing todo';
+            task.done();
         });
     },
     /*

@@ -15,8 +15,8 @@ module.exports = {
     /*
      * Connect to database
      */
-    connectToDB: (config, callback) => {
-        dbOps.connect(config, () => callback());
+    connectToDB: async (config) => {
+        await dbOps.connect(config);
     },
     /*
      * Create server to serve static content
@@ -40,6 +40,7 @@ module.exports = {
      * Start and return the express server
      */
     startServer: (config, callback) => {
+        // express does not provide Promises /facepalm (https://github.com/nodejs/node/issues/21482)
         server = app.listen(config.port, () => callback(config.port));
     },
     /*
@@ -59,41 +60,39 @@ const tools = {
      * Initialize endpoint to GET todos for a given date
      */
     initGET: () => {
-        app.get('/v1/todos/:date', (req, res) => {
-            dbOps.getTodos(req.params['date'], (todoList) => res.send(todoList));
+        app.get('/v1/todos/:date', async (req, res) => {
+            let todoList = await dbOps.getTodos(req.params['date']);
+            res.send(todoList);
         });
     },
     /*
      * Initialize endpoint to PUT a new todo
      */
     initPUT: () => {
-        app.put('/v1/new/', (req, res) => {
-            dbOps.createTodo(req.body, (success) => {
-                res.status(success ? 201 : 400);
-                res.send(success ? '' : 'Unable to create todo');
-            });
+        app.put('/v1/new/', async (req, res) => {
+            let success = await dbOps.createTodo(req.body);
+            res.status(success ? 201 : 500);
+            res.send(success ? '' : 'Unable to create todo');
         });
     },
     /*
      * Initialize endpoint to POST an update to an existing todo with a given ID
      */
     initPOST: () => {
-        app.post('/v1/update/:todoID', (req, res) => {
-            dbOps.updateTodo(req.params['todoID'], req.body, (success) => {
-                res.status(success ? 200 : 404);
-                res.send(success ? '' : 'Unable to update todo');
-            });
+        app.post('/v1/update/:todoID', async (req, res) => {
+            let success = await dbOps.updateTodo(req.params['todoID'], req.body);
+            res.status(success ? 200 : 500);
+            res.send(success ? '' : 'Unable to update todo');
         });
     },
     /*
      * Initialize endpoint to DELETE a todo with a given ID
      */
     initDELETE: () => {
-        app.delete('/v1/delete/:todoID', (req, res) => {
-            dbOps.deleteTodo(req.params['todoID'], (success) => {
-                res.status(success ? 200 : 404);
-                res.send(success ? '' : 'Unable to delete todo');
-            });
+        app.delete('/v1/delete/:todoID', async (req, res) => {
+            let success = await dbOps.deleteTodo(req.params['todoID']);
+            res.status(success ? 200 : 500);
+            res.send(success ? '' : 'Unable to delete todo');
         });
     },
     /*
