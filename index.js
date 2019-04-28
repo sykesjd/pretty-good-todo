@@ -19,8 +19,8 @@ const startup = {
      */
     attachDateListeners: () => {
         $('#dateSel').change((e) => {
-            $('#todos').empty().attr('data-date', dateTools.toISODate($('#dateSel').val()));
-            ajaxOps.getTodos($('#todos').attr('data-date'), (data) => {
+            $('#todos').empty();
+            ajaxOps.getTodos($('#dateSel').val(), (data) => {
                 data.forEach((todo) => {
                     let element = todoOps.todoEl(todo);
                     todoOps.attachElListeners(element);
@@ -33,9 +33,6 @@ const startup = {
         });
         $('#prev').click(() => {
             $('#dateSel').val((i, val) => dateTools.decDate(val)).change();
-        });
-        $('#editDate').change(() => {
-            $('#editDate').attr('data-date', dateTools.toISODate($('#editDate').val()));
         });
         $('#editNext').click(() => {
             $('#editDate').val((i, val) => dateTools.incDate(val)).change();
@@ -116,14 +113,6 @@ const dateTools = {
         let today = new Date();
         today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
         return today.toJSON().slice(0,10);
-    },
-    /*
-     * Get ISO string for the value of a date field
-     */
-    toISODate: (dateVal) => {
-        let date = new Date(dateVal);
-        date.setUTCHours(0, 0, 0, 0);
-        return date.toISOString();
     },
     /*
      * Increment a date field's value

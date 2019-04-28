@@ -3,6 +3,7 @@
  */
 'use strict';
 
+const ObjectId = require('mongodb').ObjectID;
 let db, todos, lastRollover;
 
 /*
@@ -22,16 +23,15 @@ module.exports = {
      * Get todos scheduled on the given date, rolling over if necessary
      */
     getTodos: async (date) => {
-        let theDate = tools.getAbsDate(date);
-        if (new Date(lastRollover) < new Date(tools.getAbsDate('today')) && !(await tools.rolloverTodos()))
+        let theDate = tools.getDateString(date);
+        if (lastRollover < tools.getDateString('today') && !(await tools.rolloverTodos()))
             throw 'Error rolling over todos';
         return await tools.get(theDate);
     },
     /*
-     * Create todo from request body, adding a GUID and ordering
+     * Create todo from request body, adding ordering
      */
     createTodo: async (body) => {
-        body._id = tools.guid();
         body = tools.todoFromBody(body);
         let dateTodos = await todos.find({ 'date': body.date }).toArray();
         body.order = dateTodos.length + 1;
@@ -45,7 +45,7 @@ module.exports = {
         if (id !== body._id)
             return false;
         body = tools.todoFromBody(body);
-        let todo = await todos.find({ '_id': id }).toArray();
+        let todo = await todos.find({ '_id': ObjectId(id) }).toArray();
         if (todo.length === 0)
             throw 'Todo to update not found';
         if (todo[0].date !== body.date) {
@@ -62,14 +62,14 @@ module.exports = {
      * Deletes todo with ID
      */
     deleteTodo: async (id) => {
-        let todo = await todos.find({ '_id': id }).toArray();
+        let todo = await todos.find({ '_id': ObjectId(id) }).toArray();
         if (todo.length === 0)
             throw 'Todo to delete not found';
         let dateTodos = await todos.find({ 'date': todo[0].date }).toArray();
         for (let dt of dateTodos)
             if (dt.order > todo[0].order)
                 await tools.adjustTodo(dt);
-        let deleteResult = await todos.deleteOne({ '_id': id }, {});
+        let deleteResult = await todos.deleteOne({ '_id': Object(id) }, {});
         return deleteResult.result.ok === 1;
     },
     /*
@@ -89,13 +89,13 @@ const tools = {
      */
     rolloverTodos: async () => {
         let success = true;
-        let today = tools.getAbsDate('today');
+        let today = tools.getDateString('today');
         let expDate = new Date(today);
         expDate.setDate(expDate.getDate() - 60);
         let existingTodos = await todos.find({ 'date': today }).toArray();
         let rollingOver = await todos.find({ 'date': { $lt: today }, 'done': false }).toArray();
         for (let i = 0; i < rollingOver.length; i++) {
-            let updateResult = await todos.updateOne({ '_id': rollingOver[i]._id }, { $set: { 'date': today, 'order': existingTodos.length + i + 1 } }, {});
+            let updateResult = await todos.updateOne({ '_id': ObjectId(rollingOver[i]._id) }, { $set: { 'date': today, 'order': existingTodos.length + i + 1 } }, {});
             success = success && (updateResult.matchedCount === 0 || updateResult.result.ok === 1);
         }
         let deleteResult = await todos.deleteMany({ 'date': { $lt: expDate.toISOString() }, 'done': true }, {});
@@ -115,14 +115,16 @@ const tools = {
      * Perform post operation on the database
      */
     post: async (id, body) => {
-        let updateResult = await todos.updateOne({ '_id': id }, { $set: body }, {});
+        if (body._id)
+            delete body._id; // delete necessary to prevent immutability error
+        let updateResult = await todos.updateOne({ '_id': ObjectId(id) }, { $set: body }, {});
         return updateResult.result.ok === 1;
     },
     /*
      * Decrement order of given todo
      */
     adjustTodo: async (dt) => {
-        let adjustResult = await todos.updateOne({ '_id': dt._id }, { $set: { 'order': dt.order - 1 } }, {});
+        let adjustResult = await todos.updateOne({ '_id': ObjectId(dt._id) }, { $set: { 'order': dt.order - 1 } }, {});
         if (adjustResult.result.ok !== 1)
             throw 'Error adjusting surrounding todos';
     },
@@ -130,26 +132,16 @@ const tools = {
      * Creates todo object from body of request
      */
     todoFromBody: (body) => {
-        let today = tools.getAbsDate('today');
-        if (!body.done && new Date(body.date) < new Date(today))
+        let today = tools.getDateString('today');
+        if (!body.done && body.date < today)
             body.date = today;
         return body;
     },
     /*
      * Get todo date for given date object
      */
-    getAbsDate: (date) => {
+    getDateString: (date) => {
         let theDate = (date === 'today' ? new Date((new Date()).toDateString()) : new Date(date));
-        theDate.setUTCHours(0, 0, 0, 0);
-        return theDate.toISOString();
-    },
-    /*
-     * Helper function for createTodo: create a GUID string
-     */
-    guid: () => tools.s4() + tools.s4() + '-' + tools.s4() + '-' + tools.s4()
-                    + '-' + tools.s4() + '-' + tools.s4() + tools.s4() + tools.s4(),
-    /*
-     * Helper function for guid: create string of four hex digits
-     */
-    s4: () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)
+        return theDate.toJSON().slice(0, 10);
+    }
 };

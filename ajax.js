@@ -77,7 +77,7 @@ const ajaxTools = {
      */
     newTodo: () => {
         return {
-            'date': $('#todos').attr('data-date'),
+            'date': $('#dateSel').val(),
             'title': $('#newTitle').val(),
             'body': $('#newMessage').val(),
             'done': false
@@ -89,7 +89,7 @@ const ajaxTools = {
     todoFromEl: (li, editBoxUsed) => {
         return {
             '_id': li.attr('data-id'),
-            'date': $(editBoxUsed ? '#editDate' : '#todos').attr('data-date'),
+            'date': $(editBoxUsed ? '#editDate' : '#dateSel').val(),
             'title': li.attr('data-title'),
             'body': li.attr('data-body'),
             'done': li.attr('data-checked') === 'true',

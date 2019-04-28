@@ -89,7 +89,7 @@ const todoTools = {
         $('#edit').show();
         $('#editTitle').val(todoEl.attr('data-title'));
         $('#editMessage').val(todoEl.attr('data-body'));
-        $('#editDate').val($('#dateSel').val()).attr('data-date', $('#todos').attr('data-date'));
+        $('#editDate').val($('#dateSel').val());
         $('#editSubmit').click(() => {
             if ($('#editTitle').val() !== '') {
                 todoEl.attr('data-title', $('#editTitle').val()).attr('data-body', $('#editMessage').val());
