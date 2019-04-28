@@ -65,7 +65,7 @@ If you wish to use a different back-end than MongoDB, then you must create your 
 	- Request body format (your function must add fields `_id` and `order`):
 		```
 		{
-			'date': 'dateISOString',
+			'date': 'yyyy-MM-dd',
 			'title': 'todoTitle',
 			'body': 'todoBody',
 			'done': false
@@ -75,8 +75,8 @@ If you wish to use a different back-end than MongoDB, then you must create your 
 	- Request body format:
 		```
 		{
-			'_id': 'GUID',
-			'date': 'dateISOString',
+			'_id': 'ObjectIDstring',
+			'date': 'yyyy-MM-dd',
 			'title': 'todoTitle',
 			'body': 'todoBody',
 			'done': bool,
