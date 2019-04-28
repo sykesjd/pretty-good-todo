@@ -88,18 +88,21 @@ const tools = {
      * Move undone todos from the past to today and delete done todos older than 60 days
      */
     rolloverTodos: async () => {
-        lastRollover = tools.getAbsDate('today');
         let success = true;
-        let expDate = new Date(lastRollover);
+        let today = tools.getAbsDate('today');
+        let expDate = new Date(today);
         expDate.setDate(expDate.getDate() - 60);
-        let existingTodos = await todos.find({ 'date': lastRollover }).toArray();
-        let rollingOver = await todos.find({ 'date': { $lt: lastRollover }, 'done': false }).toArray();
+        let existingTodos = await todos.find({ 'date': today }).toArray();
+        let rollingOver = await todos.find({ 'date': { $lt: today }, 'done': false }).toArray();
         for (let i = 0; i < rollingOver.length; i++) {
-            let updateResult = await todos.updateOne({ '_id': rollingOver[i]._id }, { $set: { 'date': lastRollover, 'order': existingTodos.length + i + 1 } }, {});
+            let updateResult = await todos.updateOne({ '_id': rollingOver[i]._id }, { $set: { 'date': today, 'order': existingTodos.length + i + 1 } }, {});
             success = success && (updateResult.matchedCount === 0 || updateResult.result.ok === 1);
         }
         let deleteResult = await todos.deleteMany({ 'date': { $lt: expDate.toISOString() }, 'done': true }, {});
-        return success && (deleteResult.matchedCount === 0 || deleteResult.result.ok === 1);
+        success = success && (deleteResult.matchedCount === 0 || deleteResult.result.ok === 1);
+        if (success)
+            lastRollover = today;
+        return success;
     },
     /*
      * Perform get operation on the database
