@@ -59,9 +59,9 @@ This application rolls over undone todos from past days into the current day lik
 
 If you wish to use a different back-end than MongoDB, then you must create your own `database.js` with the following functions exported:
 
-- `connect(callback)`: connects to your database then executes `callback()`
-- `getTodos(date, callback)`: gets the todos for the given date from your database and returns the list of todos via `callback(todoList)`
-- `createTodo(body, callback)`: adds a todo to your database from the data in the request body and returns whether the operation was successful via `callback(success)`
+- `connect()`: asynchronously connects to your database
+- `getTodos(date)`: asynchronously gets the todos for the given date from your database and returns the list of todos
+- `createTodo(body)`: asynchronously adds a todo to your database from the data in the request body and returns whether the operation was successful
 	- Request body format (your function must add fields `_id` and `order`):
 		```
 		{
@@ -71,7 +71,7 @@ If you wish to use a different back-end than MongoDB, then you must create your 
 			'done': false
 		}
 		```
-- `updateTodo(id, body, callback)`: updates the todo with the given id in your database using the data in the request body and returns whether the operation was successful via `callback(success)`
+- `updateTodo(id, body)`: asynchronously updates the todo with the given id in your database using the data in the request body and returns whether the operation was successful
 	- Request body format:
 		```
 		{
@@ -83,7 +83,7 @@ If you wish to use a different back-end than MongoDB, then you must create your 
 			'order': int
 		}
 		```
-- `deleteTodo(id, callback)`: deletes the todo with the given id from your database and returns whether the operation was successful via `callback(success)`
+- `deleteTodo(id)`: asynchronously deletes the todo with the given id from your database and returns whether the operation was successful
 - `disconnect()`: closes the connection to your database
 
 ## Importing from GoodTodo
