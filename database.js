@@ -69,7 +69,7 @@ module.exports = {
         for (let dt of dateTodos)
             if (dt.order > todo[0].order)
                 await tools.adjustTodo(dt);
-        let deleteResult = await todos.deleteOne({ '_id': Object(id) }, {});
+        let deleteResult = await todos.deleteOne({ '_id': ObjectId(id) }, {});
         return deleteResult.result.ok === 1;
     },
     /*
