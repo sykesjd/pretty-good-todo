@@ -8,12 +8,12 @@ const todoOps = {
      * Attach event listeners to a newly-created todo li
      */
     attachElListeners: (element) => {
-        element.find('input[type="checkbox"]').change((e) => todoTools.markCompletion(e, element));
-        element.find('.glyphicon-chevron-up').click(() => todoTools.moveUp(element));
-        element.find('.glyphicon-chevron-down').click(() => todoTools.moveDown(element));
-        element.find('.glyphicon-info-sign').click(() => element.find('.message').toggle());
-        element.find('.glyphicon-edit').click((e) => todoTools.editTodo(element));
-        element.find('.glyphicon-remove-sign').click(() => todoTools.deleteTodo(element));
+        element.find('input[type="checkbox"]').on('change', (e) => todoTools.markCompletion(e, element));
+        element.find('.glyphicon-chevron-up').on('click', () => todoTools.moveUp(element));
+        element.find('.glyphicon-chevron-down').on('click', () => todoTools.moveDown(element));
+        element.find('.glyphicon-info-sign').on('click', () => element.find('.message').toggle());
+        element.find('.glyphicon-edit').on('click', (e) => todoTools.editTodo(element));
+        element.find('.glyphicon-remove-sign').on('click', () => todoTools.deleteTodo(element));
     },
     /*
      * Create todo li from todo object
@@ -90,7 +90,7 @@ const todoTools = {
         $('#editTitle').val(todoEl.attr('data-title'));
         $('#editMessage').val(todoEl.attr('data-body'));
         $('#editDate').val($('#dateSel').val());
-        $('#editSubmit').click(() => {
+        $('#editSubmit').off('click').on('click', () => {
             if ($('#editTitle').val() !== '') {
                 todoEl.attr('data-title', $('#editTitle').val()).attr('data-body', $('#editMessage').val());
                 ajaxOps.updateTodo(todoEl, true, () => {

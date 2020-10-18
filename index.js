@@ -18,7 +18,7 @@ const startup = {
      * Attach listeners to date controls
      */
     attachDateListeners: () => {
-        $('#dateSel').change((e) => {
+        $('#dateSel').on('change', (e) => {
             $('#todos').empty();
             ajaxOps.getTodos($('#dateSel').val(), (data) => {
                 data.forEach((todo) => {
@@ -28,16 +28,16 @@ const startup = {
                 });
             }, () => $('#errorReport').text('Error retrieving todos; reload the page'));
         });
-        $('#next').click(() => {
+        $('#next').on('click', () => {
             $('#dateSel').val((i, val) => dateTools.incDate(val)).change();
         });
-        $('#prev').click(() => {
+        $('#prev').on('click', () => {
             $('#dateSel').val((i, val) => dateTools.decDate(val)).change();
         });
-        $('#editNext').click(() => {
+        $('#editNext').on('click', () => {
             $('#editDate').val((i, val) => dateTools.incDate(val)).change();
         });
-        $('#editPrev').click(() => {
+        $('#editPrev').on('click', () => {
             $('#editDate').val((i, val) => dateTools.decDate(val)).change();
         });
     },
@@ -45,12 +45,12 @@ const startup = {
      * Attach listeners to form buttons
      */
     attachButtonListeners: () => {
-        $('#editCancel').click(() => {
-            $('#editSubmit').unbind('click');
+        $('#editCancel').on('click', () => {
+            $('#editSubmit').off('click');
             $('#edit').hide();
             $('#new').show();
         });
-        $('#newSubmit').click(() => {
+        $('#newSubmit').on('click', () => {
             if ($('#newTitle').val() !== '') {
                 ajaxOps.createTodo(() => {
                     $('#newTitle').val('');
