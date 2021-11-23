@@ -9,15 +9,21 @@ const startupOps = require('./startup.js');
 /*
  * Connect to database then perform server startup operations
  */
-(async () => {
-    console.log('Connecting to todo database...');
-    await startupOps.connectToDB(config);
-    console.log('Connected to todo database successfully');
-    console.log('Starting server...');
-    startupOps.createServer();
-    startupOps.initializeAPI();
-    startupOps.startServer(config, (port) => {
-        console.log('Server started and running on http://localhost:' + port + '/');
-        startupOps.initializeShutdownHandler();
-    });
-})();
+try {
+    (async () => {
+        console.log(Date.now() + ': Connecting to todo database...');
+        await startupOps.connectToDB(config);
+        console.log(Date.now() + ': Connected to todo database successfully');
+        console.log(Date.now() + ': Starting server...');
+        startupOps.createServer();
+        startupOps.initializeAPI();
+        startupOps.startServer(config, (port) => {
+            console.log(Date.now() + ': Server started and running on http://localhost:' + port + '/');
+            startupOps.initializeShutdownHandler();
+        });
+    })();
+} catch (e) {
+    console.log(e);
+    throw e;
+}
+

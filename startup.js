@@ -109,7 +109,7 @@ const tools = {
      * Shutdown procedure: close database connection and server operations
      */
     shutdown: () => {
-        console.log('Shutting down...');
+        console.log(Date.now() + ': Shutting down...');
         dbOps.disconnect();
         server.close();
         process.exit(0);
