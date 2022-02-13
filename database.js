@@ -15,7 +15,7 @@ module.exports = {
      */
     connect: async (config) => {
         db = await require('mongodb').MongoClient.connect(config.connectionString, {});
-        todos = db.collection(config.collectionName);
+        todos = db.db().collection(config.collectionName);
         if (!(await tools.rolloverTodos()))
             throw 'Error rolling over todos';
     },
@@ -35,8 +35,8 @@ module.exports = {
         body = tools.todoFromBody(body);
         let dateTodos = await todos.find({ 'date': body.date }).toArray();
         body.order = dateTodos.length + 1;
-        let insertResult = await todos.insertOne(body, {});
-        return insertResult.result.ok === 1;
+        await todos.insertOne(body, {});
+        return true;
     },
     /*
      * Update todo with ID from request body
@@ -69,8 +69,8 @@ module.exports = {
         for (let dt of dateTodos)
             if (dt.order > todo[0].order)
                 await tools.adjustTodo(dt);
-        let deleteResult = await todos.deleteOne({ '_id': ObjectId(id) }, {});
-        return deleteResult.result.ok === 1;
+        await todos.deleteOne({ '_id': ObjectId(id) }, {});
+        return true;
     },
     /*
      * Close the connection to the database
@@ -88,21 +88,16 @@ const tools = {
      * Move undone todos from the past to today and delete done todos older than 60 days
      */
     rolloverTodos: async () => {
-        let success = true;
         let today = tools.getDateString('today');
         let expDate = new Date(today);
         expDate.setDate(expDate.getDate() - 60);
         let existingTodos = await todos.find({ 'date': today }).toArray();
         let rollingOver = await todos.find({ 'date': { $lt: today }, 'done': false }).toArray();
-        for (let i = 0; i < rollingOver.length; i++) {
-            let updateResult = await todos.updateOne({ '_id': ObjectId(rollingOver[i]._id) }, { $set: { 'date': today, 'order': existingTodos.length + i + 1 } }, {});
-            success = success && (updateResult.matchedCount === 0 || updateResult.result.ok === 1);
-        }
-        let deleteResult = await todos.deleteMany({ 'date': { $lt: expDate.toISOString() }, 'done': true }, {});
-        success = success && (deleteResult.matchedCount === 0 || deleteResult.result.ok === 1);
-        if (success)
-            lastRollover = today;
-        return success;
+        for (let i = 0; i < rollingOver.length; i++)
+            await todos.updateOne({ '_id': ObjectId(rollingOver[i]._id) }, { $set: { 'date': today, 'order': existingTodos.length + i + 1 } }, {});
+        await todos.deleteMany({ 'date': { $lt: expDate.toISOString() }, 'done': true }, {});
+        lastRollover = today;
+        return true;
     },
     /*
      * Perform get operation on the database
@@ -117,16 +112,14 @@ const tools = {
     post: async (id, body) => {
         if (body._id)
             delete body._id; // delete necessary to prevent immutability error
-        let updateResult = await todos.updateOne({ '_id': ObjectId(id) }, { $set: body }, {});
-        return updateResult.result.ok === 1;
+        await todos.updateOne({ '_id': ObjectId(id) }, { $set: body }, {});
+        return true;
     },
     /*
      * Decrement order of given todo
      */
     adjustTodo: async (dt) => {
-        let adjustResult = await todos.updateOne({ '_id': ObjectId(dt._id) }, { $set: { 'order': dt.order - 1 } }, {});
-        if (adjustResult.result.ok !== 1)
-            throw 'Error adjusting surrounding todos';
+        await todos.updateOne({ '_id': ObjectId(dt._id) }, { $set: { 'order': dt.order - 1 } }, {});
     },
     /*
      * Creates todo object from body of request
